@@ -1,7 +1,7 @@
 {
   "name": "Al-Qur'an Mobile - Miki",
   "short_name": "Qur'an Miki",
-  "description": "Offline-first Al-Qur'an reader with translation, progress, and resume.",
+  "description": "Offline-first Al-Qur'an reader with translation, streak, progress, and resume.",
   "start_url": "/quran-mobile-miki/",
   "scope": "/quran-mobile-miki/",
   "display": "standalone",
