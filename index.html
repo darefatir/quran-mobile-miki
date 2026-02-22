@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Al-Qur'an Mobile - Premium Blue Gold</title>
+  <title>Qur'an Mobile - Premium Blue Gold</title>
 
   <!-- PWA -->
   <link rel="manifest" href="./manifest.webmanifest" />
@@ -33,8 +33,22 @@
   </script>
 
   <style>
+    :root{
+      --arabic-font-size: 2.2rem;
+      --arabic-line-height: 2.6;
+      --translation-font-size: 1rem;
+      --translation-line-height: 1.55;
+    }
+
     /* Default reading mode */
-    .quran-text { text-align: justify; text-align-last: center; direction: rtl; transition: all 0.3s ease; }
+    .quran-text {
+      text-align: justify;
+      text-align-last: center;
+      direction: rtl;
+      transition: all 0.3s ease;
+      font-size: var(--arabic-font-size);
+      line-height: var(--arabic-line-height);
+    }
     .ayah-container { display: inline; }
     .translation-text { display: none; }
 
@@ -44,9 +58,16 @@
       display: block; margin-bottom: 1.5rem; border-bottom: 1px dashed #cbd5e1; padding-bottom: 1rem;
     }
     body.show-translation .translation-text {
-      display: block; direction: ltr; text-align: left; text-align-last: left;
-      font-family: system-ui, sans-serif; line-height: 1.55; font-size: 1rem;
-      color: #1e3a8a; font-style: italic; margin-top: 1rem;
+      display: block;
+      direction: ltr;
+      text-align: left;
+      text-align-last: left;
+      font-family: system-ui, sans-serif;
+      line-height: var(--translation-line-height);
+      font-size: var(--translation-font-size);
+      color: #1e3a8a;
+      font-style: italic;
+      margin-top: 1rem;
     }
 
     .surah-header-block, .bismillah-block {
@@ -79,8 +100,8 @@
     <div class="max-w-2xl mx-auto px-4 py-2 flex items-start gap-3 text-sm">
       <div class="mt-0.5">📲</div>
       <div class="flex-1">
-        <div class="font-semibold">Install di iPhone:</div>
-        <div class="text-[13px] opacity-90">Tap <b>Share</b> → <b>Add to Home Screen</b> untuk mode app & offline.</div>
+        <div class="font-semibold">Install on iPhone:</div>
+        <div class="text-[13px] opacity-90">Tap <b>Share</b> → <b>Add to Home Screen</b> for app mode & offline.</div>
       </div>
       <button id="ios-install-close" class="text-lg leading-none px-2 opacity-70 hover:opacity-100" aria-label="Close">×</button>
     </div>
@@ -90,19 +111,19 @@
     <div class="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
       <div class="flex items-center gap-3">
         <button id="menu-btn" class="text-2xl p-1 focus:outline-none hover:text-amber-400 transition-colors" aria-label="Menu">☰</button>
-        <div class="font-bold text-lg hidden sm:block text-amber-500">📖 Al-Qur'an Mobile</div>
-        <div class="font-bold text-lg sm:hidden text-amber-500">📖 Al-Qur'an</div>
+        <div class="font-bold text-lg hidden sm:block text-amber-500">📖 Qur'an Mobile</div>
+        <div class="font-bold text-lg sm:hidden text-amber-500">📖 Qur'an</div>
 
         <!-- Continue + streak -->
         <button id="continue-btn"
           class="ml-2 hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-600/60 text-xs font-semibold text-slate-200 hover:bg-white/10 transition"
-          title="Lanjutkan bacaan terakhir">
+          title="Continue from last position">
           ▶ Continue
         </button>
 
         <div id="streak-pill"
           class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-600/60 text-xs font-semibold text-amber-200">
-          🔥 <span id="streak-text">0</span> hari
+          🔥 <span id="streak-text">0</span> days
         </div>
       </div>
 
@@ -127,7 +148,7 @@
 
   <aside id="sidebar" class="fixed top-0 left-0 h-full w-80 bg-slate-50 shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col dark:bg-slate-900">
     <div class="bg-navy text-amber-500 p-4 flex justify-between items-center shadow-md">
-      <div class="font-bold text-lg tracking-wide">⚙️ Pengaturan</div>
+      <div class="font-bold text-lg tracking-wide">⚙️ Settings</div>
       <button id="close-btn" class="text-3xl leading-none hover:text-red-400 focus:outline-none text-slate-300" aria-label="Close">&times;</button>
     </div>
 
@@ -136,32 +157,59 @@
       <!-- Continue on mobile -->
       <button id="continue-btn-mobile"
         class="w-full px-4 py-3 rounded-lg font-bold border-2 border-slate-300 bg-white text-slate-700 transition-colors flex justify-center items-center gap-2 shadow-sm hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-700">
-        ▶ Lanjutkan Bacaan
+        ▶ Continue Reading
       </button>
 
       <!-- Translation ON/OFF -->
       <div class="flex flex-col gap-2">
-        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tampilan Bacaan</label>
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Reading Mode</label>
         <button id="toggle-translation" class="w-full px-4 py-3 rounded-lg font-bold border-2 border-slate-300 bg-white text-slate-600 transition-colors flex justify-start items-center gap-3 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
-          <span class="text-xl">🈯</span> <span id="label-trans">Arti: OFF</span>
+          <span class="text-xl">🈯</span> <span id="label-trans">Translation: OFF</span>
         </button>
       </div>
 
       <!-- Translation language -->
       <div class="flex flex-col gap-2">
-        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Bahasa Terjemahan</label>
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Translation Language</label>
         <select id="translation-lang" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
           <option value="id.indonesian">🇮🇩 Bahasa Indonesia</option>
           <option value="en.sahih">🇬🇧 English (Sahih Intl.)</option>
         </select>
         <div class="text-[11px] text-slate-500 dark:text-slate-400">
-          (Jika ganti bahasa, app akan memuat ulang Juz untuk terjemahan tersebut.)
+          Changing language will reload the current Juz for that translation.
+        </div>
+      </div>
+
+      <!-- Font size sliders -->
+      <div class="flex flex-col gap-3">
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Font Size</label>
+
+        <!-- Arabic slider -->
+        <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:bg-slate-800 dark:border-slate-700">
+          <div class="flex justify-between items-center mb-2">
+            <div class="font-semibold text-sm text-slate-700 dark:text-slate-100">Arabic</div>
+            <div class="text-xs text-slate-500 dark:text-slate-300"><span id="arabic-size-label">2.2</span> rem</div>
+          </div>
+          <input id="arabic-size-slider" type="range" min="1.6" max="3.2" step="0.05" value="2.2"
+                 class="w-full accent-amber-500">
+          <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-2">Affects Arabic text only.</div>
+        </div>
+
+        <!-- Translation slider (only visible when translation ON) -->
+        <div id="translation-size-box" class="hidden rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:bg-slate-800 dark:border-slate-700">
+          <div class="flex justify-between items-center mb-2">
+            <div class="font-semibold text-sm text-slate-700 dark:text-slate-100">Translation</div>
+            <div class="text-xs text-slate-500 dark:text-slate-300"><span id="translation-size-label">1.0</span> rem</div>
+          </div>
+          <input id="translation-size-slider" type="range" min="0.85" max="1.6" step="0.05" value="1.0"
+                 class="w-full accent-amber-500">
+          <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-2">Affects translation text only.</div>
         </div>
       </div>
 
       <!-- Theme -->
       <div class="flex flex-col gap-2">
-        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tema</label>
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Theme</label>
         <button id="toggle-dark" class="w-full px-4 py-3 rounded-lg font-bold border-2 border-slate-300 bg-white text-slate-600 transition-colors flex justify-start items-center gap-3 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
           <span class="text-xl">🌙</span> <span id="label-dark">Dark: OFF</span>
         </button>
@@ -175,7 +223,7 @@
 
         <button id="offline-current"
           class="w-full px-4 py-3 rounded-lg font-bold border-2 border-amber-500 bg-amber-50 text-amber-700 transition-colors flex justify-center items-center gap-2 shadow-sm hover:bg-amber-500 hover:text-white dark:bg-amber-500/10 dark:text-amber-200 dark:border-amber-500/40 dark:hover:bg-amber-500 dark:hover:text-slate-900">
-          ⬇️ Simpan Offline (Juz Ini)
+          ⬇️ Save Offline (This Juz)
         </button>
 
         <button id="offline-all"
@@ -185,7 +233,7 @@
 
         <div id="offline-progress" class="hidden text-[12px] text-slate-600 dark:text-slate-300">
           <div class="flex justify-between">
-            <span id="offline-progress-text">Menyiapkan...</span>
+            <span id="offline-progress-text">Preparing...</span>
             <span id="offline-progress-pct">0%</span>
           </div>
           <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden mt-2 dark:bg-slate-800">
@@ -194,32 +242,32 @@
         </div>
 
         <div class="text-[11px] text-slate-500 dark:text-slate-400">
-          Tip: Download dulu saat Wi-Fi, setelah itu baca tanpa internet.
+          Tip: Download on Wi-Fi first, then read without internet.
         </div>
       </div>
 
       <!-- Navigation -->
       <div class="flex flex-col gap-2">
-        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Navigasi Langsung</label>
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Quick Navigation</label>
 
         <select id="juz-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700"></select>
 
         <select id="surah-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium disabled:bg-slate-100 disabled:text-slate-400 text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
-          <option value="">-- Menunggu Data --</option>
+          <option value="">-- Waiting for Data --</option>
         </select>
 
         <select id="page-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium disabled:bg-slate-100 disabled:text-slate-400 text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
-          <option value="">-- Menunggu Data --</option>
+          <option value="">-- Waiting for Data --</option>
         </select>
       </div>
 
       <div class="mt-auto pt-4 pb-2">
         <div class="text-xs text-center text-slate-400 italic mb-4">
-          *Tap nomor ayat (۝) untuk menandai progress bacaan Anda.
+          *Tap the ayah marker (۝) to save your reading boundary.
         </div>
 
         <button id="reset-btn" class="w-full px-4 py-3 rounded-lg font-bold border-2 border-red-500 bg-red-50 text-red-600 transition-colors flex justify-center items-center gap-2 shadow-sm hover:bg-red-500 hover:text-white">
-          🗑️ Reset Progress
+          🗑️ Reset Data
         </button>
 
         <div class="text-[11px] text-center text-slate-400 mt-4 dark:text-slate-500">
@@ -230,7 +278,7 @@
   </aside>
 
   <div id="toast" class="fixed bottom-5 bg-slate-800 text-amber-400 px-4 py-2 rounded-full shadow-lg z-50 text-sm font-medium border border-slate-700">
-    Memuat data...
+    Loading...
   </div>
 
   <div id="loading" class="mt-20 text-slate-500 font-medium flex flex-col items-center gap-3 dark:text-slate-300">
@@ -238,7 +286,7 @@
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
     </svg>
-    <span class="text-center text-sm" id="loading-text">Menyiapkan...</span>
+    <span class="text-center text-sm" id="loading-text">Preparing...</span>
   </div>
 
   <main id="quran-container" class="w-full max-w-2xl px-4 py-6 box-border hidden"></main>
@@ -250,11 +298,8 @@
     (function registerServiceWorker() {
       if (!('serviceWorker' in navigator)) return;
       window.addEventListener('load', async () => {
-        try {
-          await navigator.serviceWorker.register('./service-worker.js', { scope: './' });
-        } catch (e) {
-          console.warn('SW register failed', e);
-        }
+        try { await navigator.serviceWorker.register('./service-worker.js', { scope: './' }); }
+        catch (e) { console.warn('SW register failed', e); }
       });
     })();
 
@@ -299,6 +344,13 @@
     const iosBanner = document.getElementById('ios-install-banner');
     const iosBannerClose = document.getElementById('ios-install-close');
 
+    // Font sliders
+    const arabicSizeSlider = document.getElementById('arabic-size-slider');
+    const arabicSizeLabel = document.getElementById('arabic-size-label');
+    const translationSizeBox = document.getElementById('translation-size-box');
+    const translationSizeSlider = document.getElementById('translation-size-slider');
+    const translationSizeLabel = document.getElementById('translation-size-label');
+
     /**********************
      * State
      **********************/
@@ -324,12 +376,16 @@
 
       // iOS banner dismissed
       iosBannerDismissed: 'iosBannerDismissed',
+
+      // font sizes
+      arabicFontRem: 'arabicFontRem',
+      translationFontRem: 'translationFontRem',
     };
 
     const EDITIONS = {
       ARABIC: 'quran-uthmani',
       ID: 'id.indonesian',
-      EN: 'en.sahih', // common edition id for Sahih International in this API ecosystem
+      EN: 'en.sahih',
     };
 
     /**********************
@@ -386,11 +442,9 @@
 
       let streak = safeNumber(localStorage.getItem(STORAGE_KEYS.streakCount), 0);
 
-      if (!last) {
-        streak = 1;
-      } else if (last === t) {
-        // no change
-      } else {
+      if (!last) streak = 1;
+      else if (last === t) { /* no change */ }
+      else {
         const diff = daysBetweenISO(last, t);
         if (diff === 1) streak = Math.max(1, streak + 1);
         else streak = 1;
@@ -450,14 +504,39 @@
     function maybeShowIOSBanner() {
       const dismissed = localStorage.getItem(STORAGE_KEYS.iosBannerDismissed) === 'true';
       if (dismissed) return;
-      if (isIOS() && !isInStandaloneMode()) {
-        iosBanner.classList.add('show');
-      }
+      if (isIOS() && !isInStandaloneMode()) iosBanner.classList.add('show');
     }
     iosBannerClose.addEventListener('click', () => {
       iosBanner.classList.remove('show');
       localStorage.setItem(STORAGE_KEYS.iosBannerDismissed, 'true');
     });
+
+    /**********************
+     * Font size logic
+     **********************/
+    function clamp(n, min, max){ return Math.min(max, Math.max(min, n)); }
+
+    function applyArabicFontRem(rem) {
+      const v = clamp(rem, 1.6, 3.2);
+      document.documentElement.style.setProperty('--arabic-font-size', `${v.toFixed(2)}rem`);
+      arabicSizeLabel.innerText = v.toFixed(2);
+      localStorage.setItem(STORAGE_KEYS.arabicFontRem, String(v));
+    }
+
+    function applyTranslationFontRem(rem) {
+      const v = clamp(rem, 0.85, 1.6);
+      document.documentElement.style.setProperty('--translation-font-size', `${v.toFixed(2)}rem`);
+      translationSizeLabel.innerText = v.toFixed(2);
+      localStorage.setItem(STORAGE_KEYS.translationFontRem, String(v));
+    }
+
+    function updateTranslationSliderVisibility() {
+      const isOn = document.body.classList.contains('show-translation');
+      translationSizeBox.classList.toggle('hidden', !isOn);
+    }
+
+    arabicSizeSlider.addEventListener('input', (e) => applyArabicFontRem(safeNumber(e.target.value, 2.2)));
+    translationSizeSlider.addEventListener('input', (e) => applyTranslationFontRem(safeNumber(e.target.value, 1.0)));
 
     /**********************
      * IndexedDB cache
@@ -513,7 +592,7 @@
     /**********************
      * UI state
      **********************/
-    function setLoadingState(isLoading, message = 'Menyiapkan...') {
+    function setLoadingState(isLoading, message = 'Preparing...') {
       if (isLoading) {
         loading.style.display = 'flex';
         loadingText.innerText = message;
@@ -539,8 +618,9 @@
     function toggleTranslation() {
       document.body.classList.toggle('show-translation');
       const isActive = document.body.classList.contains('show-translation');
-      updateToggleUI(toggleTransBtn, 'label-trans', isActive, `Arti: ${isActive ? 'ON' : 'OFF'}`);
+      updateToggleUI(toggleTransBtn, 'label-trans', isActive, `Translation: ${isActive ? 'ON' : 'OFF'}`);
       localStorage.setItem(STORAGE_KEYS.transPref, String(isActive));
+      updateTranslationSliderVisibility();
     }
 
     function setDarkMode(isDark) {
@@ -589,7 +669,7 @@
       localStorage.setItem(STORAGE_KEYS.khatamAyah, String(absAyahNumber));
       calculateProgress();
       recordReadingSession();
-      showToast('Batas bacaan tersimpan! 🌟');
+      showToast('Reading boundary saved! 🌟');
     }
 
     /**********************
@@ -627,17 +707,17 @@
 
       if (savedScrollY >= 0 && savedJuz === currentActiveJuz && savedScrollJuz === currentActiveJuz) {
         window.scrollTo({ top: savedScrollY, behavior: 'smooth' });
-        showToast('Lanjutkan posisi terakhir ✅');
+        showToast('Resumed last position ✅');
         return;
       }
 
       if (savedPageID && document.getElementById(savedPageID)) {
         scrollToTarget(savedPageID);
-        showToast('Lanjutkan halaman terakhir ✅');
+        showToast('Resumed last page ✅');
         return;
       }
 
-      showToast('Belum ada posisi terakhir 🙂');
+      showToast('No saved position yet 🙂');
     }
 
     continueBtn.addEventListener('click', resumeToLastPosition);
@@ -678,7 +758,6 @@
     async function getJuzData(juzNumber, translationEdition) {
       const cacheKey = `juz-${juzNumber}__trans-${translationEdition}`;
 
-      // 1) IndexedDB cache first
       try {
         const cached = await idbGet(cacheKey);
         if (cached?.value?.dataArabic && cached?.value?.dataTrans) {
@@ -688,7 +767,6 @@
         console.warn('IDB read failed', e);
       }
 
-      // 2) Network fallback, then store
       const fresh = await fetchJuzFromNetwork(juzNumber, translationEdition);
       try { await idbSet(cacheKey, fresh); } catch (e) { console.warn('IDB write failed', e); }
       return { ...fresh, source: 'network' };
@@ -703,18 +781,17 @@
     async function fetchAndRenderJuz(juzNumber, isInitialLoad = false) {
       const translationEdition = getSelectedTranslationEdition();
 
-      setLoadingState(true, 'Menyiapkan data (offline-first)...');
+      setLoadingState(true, 'Preparing (offline-first)...');
       container.innerHTML = '';
 
-      surahSelect.innerHTML = '<option value="">-- Menunggu Data --</option>';
-      pageSelect.innerHTML = '<option value="">-- Menunggu Data --</option>';
+      surahSelect.innerHTML = '<option value="">-- Waiting for Data --</option>';
+      pageSelect.innerHTML = '<option value="">-- Waiting for Data --</option>';
       surahSelect.disabled = true;
       pageSelect.disabled = true;
 
       try {
         const { dataArabic, dataTrans, source } = await getJuzData(juzNumber, translationEdition);
-
-        if (source === 'cache') showToast('Memuat dari cache (offline-ready) ✅');
+        if (source === 'cache') showToast('Loaded from cache ✅');
 
         const ayahsArabic = dataArabic.data.ayahs;
         const ayahsTrans = dataTrans.data.ayahs || [];
@@ -751,9 +828,9 @@
                    id="page-${ayah.page}">
                 <div class="bg-slate-100 text-slate-600 text-center font-bold py-2 border-b border-slate-300 text-sm tracking-wide flex justify-between px-4 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800">
                   <span>Juz ${juzNumber}</span>
-                  <span>Halaman ${ayah.page}</span>
+                  <span>Page ${ayah.page}</span>
                 </div>
-                <div class="p-5 font-quran text-[2.2rem] leading-[2.6] quran-text text-navy dark:text-slate-100">`;
+                <div class="p-5 font-quran quran-text text-navy dark:text-slate-100">`;
             currentPageNumber = ayah.page;
           }
 
@@ -793,14 +870,14 @@
         container.innerHTML = htmlContent;
 
         // dropdowns
-        surahSelect.innerHTML = '<option value="">-- Pilih Surah --</option>';
+        surahSelect.innerHTML = '<option value="">-- Select Surah --</option>';
         for (const s of uniqueSurahs) {
           const label = `${s.number}. ${s.englishName} (${s.arabicName || '—'})`;
           surahSelect.innerHTML += `<option value="surah-${s.number}">${label}</option>`;
         }
 
-        pageSelect.innerHTML = '<option value="">-- Pilih Halaman --</option>';
-        for (const page of uniquePages) pageSelect.innerHTML += `<option value="page-${page}">Halaman ${page}</option>`;
+        pageSelect.innerHTML = '<option value="">-- Select Page --</option>';
+        for (const page of uniquePages) pageSelect.innerHTML += `<option value="page-${page}">Page ${page}</option>`;
 
         surahSelect.disabled = false;
         pageSelect.disabled = false;
@@ -819,7 +896,6 @@
             localStorage.setItem(STORAGE_KEYS.lastReadPageID, entry.target.id);
             pageSelect.value = entry.target.id;
 
-            // counts as reading
             recordReadingSession();
           }
         }, { root: null, rootMargin: '0px', threshold: 0.3 });
@@ -828,13 +904,12 @@
 
         setLoadingState(false);
 
-        // Show Continue button if we have something
+        // Continue button visibility
         const savedScrollY = safeNumber(localStorage.getItem(STORAGE_KEYS.scrollY), -1);
         const savedPageID = localStorage.getItem(STORAGE_KEYS.lastReadPageID);
         const canContinue = (savedScrollY >= 0) || Boolean(savedPageID);
         continueBtn.classList.toggle('hidden', !canContinue);
 
-        // restore on initial load
         if (isInitialLoad) {
           const savedJuz = safeNumber(localStorage.getItem(STORAGE_KEYS.lastReadJuz), 0);
           const savedScrollJuz = safeNumber(localStorage.getItem(STORAGE_KEYS.scrollJuz), 0);
@@ -856,8 +931,8 @@
 
       } catch (error) {
         console.error(error);
-        setLoadingState(true, 'Gagal memuat. Cek koneksi internet (atau cache belum ada untuk kombinasi Juz + bahasa ini).');
-        showToast('Gagal memuat 😕');
+        setLoadingState(true, 'Failed to load. Check your internet (or cache is not available yet for this Juz + translation).');
+        showToast('Failed to load 😕');
       }
     }
 
@@ -877,18 +952,17 @@
     async function downloadOfflineForJuz(juzNumber) {
       const translationEdition = getSelectedTranslationEdition();
       showOfflineProgress(true);
-      setOfflineProgress(`Menyimpan Juz ${juzNumber}...`, 10);
+      setOfflineProgress(`Saving Juz ${juzNumber}...`, 10);
 
-      // force network then store (best effort)
       try {
         const fresh = await fetchJuzFromNetwork(juzNumber, translationEdition);
         await idbSet(`juz-${juzNumber}__trans-${translationEdition}`, fresh);
-        setOfflineProgress(`Selesai simpan Juz ${juzNumber} ✅`, 100);
-        showToast(`Offline siap: Juz ${juzNumber}`);
+        setOfflineProgress(`Saved Juz ${juzNumber} ✅`, 100);
+        showToast(`Offline ready: Juz ${juzNumber}`);
       } catch (e) {
         console.warn(e);
-        showToast('Gagal simpan offline 😕');
-        setOfflineProgress(`Gagal simpan Juz ${juzNumber}`, 0);
+        showToast('Failed to save offline 😕');
+        setOfflineProgress(`Failed saving Juz ${juzNumber}`, 0);
       } finally {
         setTimeout(() => showOfflineProgress(false), 1200);
       }
@@ -897,12 +971,12 @@
     async function downloadOfflineAllJuz() {
       const translationEdition = getSelectedTranslationEdition();
       showOfflineProgress(true);
-      setOfflineProgress('Mulai download Juz 1–30...', 0);
+      setOfflineProgress('Downloading Juz 1–30...', 0);
 
       let ok = 0;
       for (let j = 1; j <= 30; j++) {
         const pct = Math.round(((j - 1) / 30) * 100);
-        setOfflineProgress(`Download Juz ${j}/30...`, pct);
+        setOfflineProgress(`Downloading Juz ${j}/30...`, pct);
 
         try {
           const fresh = await fetchJuzFromNetwork(j, translationEdition);
@@ -910,13 +984,11 @@
           ok++;
         } catch (e) {
           console.warn(`Failed juz ${j}`, e);
-          // continue; partial caching is still useful
         }
       }
 
-      setOfflineProgress(`Selesai ✅ (${ok}/30 tersimpan)`, 100);
-      showToast(`Offline selesai: ${ok}/30 Juz`);
-
+      setOfflineProgress(`Done ✅ (${ok}/30 saved)`, 100);
+      showToast(`Offline done: ${ok}/30 Juz`);
       setTimeout(() => showOfflineProgress(false), 1800);
     }
 
@@ -927,7 +999,7 @@
      * Reset
      **********************/
     resetBtn.addEventListener('click', async () => {
-      if (!confirm('⚠️ PERINGATAN\nApakah Anda yakin ingin menghapus semua progress khatam, posisi terakhir baca, pengaturan, dan cache offline?')) return;
+      if (!confirm('⚠️ WARNING\nDelete all progress, last position, settings, and offline cache?')) return;
       localStorage.clear();
       try { await idbClearAll(); } catch (e) { console.warn('IDB clear failed', e); }
       window.location.reload();
@@ -942,7 +1014,7 @@
     translationLangSelect.addEventListener('change', async (e) => {
       const edition = e.target.value;
       setSelectedTranslationEdition(edition);
-      showToast('Ganti bahasa terjemahan...');
+      showToast('Switching translation...');
       await fetchAndRenderJuz(currentActiveJuz, false);
       closeSidebar();
     });
@@ -978,17 +1050,27 @@
     function initApp() {
       initJuzDropdown();
 
+      // Restore font sizes
+      const savedArabicRem = safeNumber(localStorage.getItem(STORAGE_KEYS.arabicFontRem), 2.2);
+      arabicSizeSlider.value = String(savedArabicRem);
+      applyArabicFontRem(savedArabicRem);
+
+      const savedTranslationRem = safeNumber(localStorage.getItem(STORAGE_KEYS.translationFontRem), 1.0);
+      translationSizeSlider.value = String(savedTranslationRem);
+      applyTranslationFontRem(savedTranslationRem);
+
       // prefs
       if (localStorage.getItem(STORAGE_KEYS.transPref) === 'true') {
         document.body.classList.add('show-translation');
-        updateToggleUI(toggleTransBtn, 'label-trans', true, 'Arti: ON');
+        updateToggleUI(toggleTransBtn, 'label-trans', true, 'Translation: ON');
       }
+      updateTranslationSliderVisibility();
 
       const darkPref = localStorage.getItem(STORAGE_KEYS.darkPref) === 'true';
       setDarkMode(darkPref);
 
       // translation edition
-      const savedEdition = getSelectedTranslationEdition();
+      const savedEdition = (localStorage.getItem(STORAGE_KEYS.translationEdition) || EDITIONS.ID);
       setSelectedTranslationEdition(savedEdition);
 
       // restore juz
