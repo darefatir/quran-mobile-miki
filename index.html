@@ -1,528 +1,853 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Al-Qur'an Mobile - Premium Blue Gold</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        quran: ['"Amiri Quran"', 'serif'],
-                    },
-                    colors: {
-                        kertas: '#fdfaf6',
-                        navy: '#0f172a',
-                        gold: '#d97706',
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <style>
-        /* Tampilan Default */
-        .quran-text {
-            text-align: justify;
-            text-align-last: center;
-            direction: rtl;
-            transition: all 0.3s ease;
-        }
-        .ayah-container {
-            display: inline;
-        }
-        .latin-text, .translation-text {
-            display: none;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Al-Qur'an Mobile - Premium Blue Gold</title>
 
-        /* Tampilan List (Toggle Aktif) */
-        body.show-latin .quran-text,
-        body.show-translation .quran-text {
-            text-align: right;
-            text-align-last: auto;
-        }
-        body.show-latin .ayah-container,
-        body.show-translation .ayah-container {
-            display: block;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px dashed #cbd5e1;
-            padding-bottom: 1rem;
-        }
-        
-        /* Fix Alignment Arab Rata Kiri & Elemen Tengah */
-        body.show-latin .latin-text,
-        body.show-translation .translation-text {
-            display: block;
-            direction: ltr;
-            text-align: left;
-            text-align-last: left;
-            font-family: system-ui, sans-serif;
-            line-height: 1.5;
-        }
-        body.show-latin .latin-text {
-            font-size: 1.1rem;
-            color: #475569;
-            margin-top: 1rem;
-        }
-        body.show-translation .translation-text {
-            font-size: 1rem;
-            color: #1e3a8a;
-            font-style: italic;
-            margin-top: 0.5rem;
-        }
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
 
-        .surah-header-block, .bismillah-block {
-            display: block !important;
-            width: 100%;
-            text-align: center !important;
-            text-align-last: center !important;
-            margin-left: auto;
-            margin-right: auto;
-        }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap" rel="stylesheet" />
 
-        /* Marker Ayat Interaktif */
-        .ayah-marker {
-            cursor: pointer;
-            transition: color 0.3s, transform 0.2s;
-        }
-        .ayah-marker:active {
-            transform: scale(1.2);
-        }
-        .ayah-marker.marked {
-            color: #d97706 !important;
-            text-shadow: 0 0 10px rgba(217, 119, 6, 0.4);
-        }
+  <script src="https://cdn.tailwindcss.com"></script>
 
-        #toast {
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.5s, visibility 0.5s;
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            quran: ['"Amiri Quran"', 'serif'],
+          },
+          colors: {
+            kertas: '#fdfaf6',
+            navy: '#0f172a',
+            gold: '#d97706',
+          }
         }
-        #toast.show {
-            visibility: visible;
-            opacity: 1;
-        }
-    </style>
+      }
+    }
+  </script>
+
+  <style>
+    /* Default reading mode */
+    .quran-text {
+      text-align: justify;
+      text-align-last: center;
+      direction: rtl;
+      transition: all 0.3s ease;
+    }
+    .ayah-container {
+      display: inline;
+    }
+    .translation-text {
+      display: none;
+    }
+
+    /* List mode (translation ON) */
+    body.show-translation .quran-text {
+      text-align: right;
+      text-align-last: auto;
+    }
+    body.show-translation .ayah-container {
+      display: block;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px dashed #cbd5e1;
+      padding-bottom: 1rem;
+    }
+    body.show-translation .translation-text {
+      display: block;
+      direction: ltr;
+      text-align: left;
+      text-align-last: left;
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+      font-size: 1rem;
+      color: #1e3a8a;
+      font-style: italic;
+      margin-top: 1rem;
+    }
+
+    .surah-header-block, .bismillah-block {
+      display: block !important;
+      width: 100%;
+      text-align: center !important;
+      text-align-last: center !important;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Interactive ayah marker */
+    .ayah-marker {
+      cursor: pointer;
+      transition: color 0.3s, transform 0.2s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .ayah-marker:active {
+      transform: scale(1.2);
+    }
+    .ayah-marker.marked {
+      color: #d97706 !important;
+      text-shadow: 0 0 10px rgba(217, 119, 6, 0.4);
+    }
+
+    #toast {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.5s, visibility 0.5s;
+    }
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans antialiased flex flex-col items-center min-h-screen relative overflow-x-hidden">
 
-    <header class="sticky top-0 w-full bg-navy text-white shadow-lg z-30">
-        <div class="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <button id="menu-btn" class="text-2xl p-1 focus:outline-none hover:text-amber-400 transition-colors">
-                    ☰
-                </button>
-                <div class="font-bold text-lg hidden sm:block text-amber-500">📖 Al-Qur'an Mobile</div>
-                <div class="font-bold text-lg sm:hidden text-amber-500">📖 Al-Qur'an</div>
-            </div>
-            <div class="text-[10px] text-slate-400 font-medium text-right leading-tight">
-                Created by:<br><span class="text-amber-200">M Faathir / Kakak Mingky</span>
-            </div>
-        </div>
-        
-        <div class="max-w-2xl mx-auto bg-slate-800 flex justify-between items-center px-4 py-1.5 text-xs font-semibold tracking-wider text-slate-300 border-t border-slate-700">
-            <div class="flex items-center gap-2">
-                <span>JUZ PROGRESS:</span>
-                <span id="prog-juz" class="text-amber-400">0%</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span>KHATAM:</span>
-                <span id="prog-total" class="text-amber-400">0%</span>
-            </div>
-        </div>
-    </header>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased flex flex-col items-center min-h-screen relative overflow-x-hidden dark:bg-slate-950 dark:text-slate-100">
 
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black/70 z-40 hidden transition-opacity opacity-0"></div>
-    
-    <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-slate-50 shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
-        <div class="bg-navy text-amber-500 p-4 flex justify-between items-center shadow-md">
-            <div class="font-bold text-lg tracking-wide">⚙️ Pengaturan</div>
-            <button id="close-btn" class="text-3xl leading-none hover:text-red-400 focus:outline-none text-slate-300">&times;</button>
-        </div>
-        
-        <div class="p-5 flex flex-col gap-6 overflow-y-auto h-full">
-            <div class="flex flex-col gap-3">
-                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tampilan Bacaan</label>
-                <button id="toggle-latin" class="w-full px-4 py-3 rounded-lg font-bold border-2 border-slate-300 bg-white text-slate-600 transition-colors flex justify-start items-center gap-3 shadow-sm">
-                    <span class="text-xl">🔤</span> <span id="label-latin">Latin: OFF</span>
-                </button>
-                <button id="toggle-translation" class="w-full px-4 py-3 rounded-lg font-bold border-2 border-slate-300 bg-white text-slate-600 transition-colors flex justify-start items-center gap-3 shadow-sm">
-                    <span class="text-xl">🇮🇩</span> <span id="label-trans">Arti: OFF</span>
-                </button>
-            </div>
+  <header class="sticky top-0 w-full bg-navy text-white shadow-lg z-30 dark:shadow-black/30">
+    <div class="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <button id="menu-btn" class="text-2xl p-1 focus:outline-none hover:text-amber-400 transition-colors" aria-label="Menu">
+          ☰
+        </button>
 
-            <hr class="border-slate-200">
+        <div class="font-bold text-lg hidden sm:block text-amber-500">📖 Al-Qur'an Mobile</div>
+        <div class="font-bold text-lg sm:hidden text-amber-500">📖 Al-Qur'an</div>
 
-            <div class="flex flex-col gap-3">
-                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Navigasi Langsung</label>
-                <div class="flex flex-col gap-2">
-                    <select id="juz-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium text-slate-700 shadow-sm"></select>
-                </div>
-                <div class="flex flex-col gap-2">
-                    <select id="surah-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium disabled:bg-slate-100 disabled:text-slate-400 text-slate-700 shadow-sm">
-                        <option value="">-- Menunggu Data --</option>
-                    </select>
-                </div>
-                <div class="flex flex-col gap-2">
-                    <select id="page-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium disabled:bg-slate-100 disabled:text-slate-400 text-slate-700 shadow-sm">
-                        <option value="">-- Menunggu Data --</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="mt-auto pt-6 pb-2">
-                <div class="text-xs text-center text-slate-400 italic mb-4">
-                    *Tap nomor ayat (۝) untuk menandai progress bacaan Anda.
-                </div>
-                <button id="reset-btn" class="w-full px-4 py-3 rounded-lg font-bold border-2 border-red-500 bg-red-50 text-red-600 transition-colors flex justify-center items-center gap-2 shadow-sm hover:bg-red-500 hover:text-white">
-                    <span>🗑️ Reset Progress</span>
-                </button>
-            </div>
-        </div>
-    </aside>
+        <!-- Continue reading -->
+        <button id="continue-btn"
+          class="ml-2 hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-600/60 text-xs font-semibold text-slate-200 hover:bg-white/10 transition"
+          title="Lanjutkan bacaan terakhir">
+          ▶ Continue
+        </button>
+      </div>
 
-    <div id="toast" class="fixed bottom-5 bg-slate-800 text-amber-400 px-4 py-2 rounded-full shadow-lg z-50 text-sm font-medium border border-slate-700">
-        Memuat data...
+      <div class="text-[10px] text-slate-400 font-medium text-right leading-tight">
+        Created by:<br><span class="text-amber-200">M Faathir / Kakak Mingky</span>
+      </div>
     </div>
 
-    <div id="loading" class="mt-20 text-slate-500 font-medium flex flex-col items-center gap-3">
-        <svg class="animate-spin h-8 w-8 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span class="text-center text-sm">Mengunduh ayat & terjemahan...</span>
+    <div class="max-w-2xl mx-auto bg-slate-800 flex justify-between items-center px-4 py-1.5 text-xs font-semibold tracking-wider text-slate-300 border-t border-slate-700">
+      <div class="flex items-center gap-2">
+        <span>JUZ PROGRESS:</span>
+        <span id="prog-juz" class="text-amber-400">0%</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span>KHATAM:</span>
+        <span id="prog-total" class="text-amber-400">0%</span>
+      </div>
     </div>
-    
-    <main id="quran-container" class="w-full max-w-2xl px-4 py-6 box-border hidden"></main>
+  </header>
 
-    <script>
-        const container = document.getElementById('quran-container');
-        const loading = document.getElementById('loading');
-        const juzSelect = document.getElementById('juz-select');
-        const surahSelect = document.getElementById('surah-select');
-        const pageSelect = document.getElementById('page-select');
-        const toggleLatinBtn = document.getElementById('toggle-latin');
-        const toggleTransBtn = document.getElementById('toggle-translation');
-        const resetBtn = document.getElementById('reset-btn');
-        
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-        const menuBtn = document.getElementById('menu-btn');
-        const closeBtn = document.getElementById('close-btn');
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/70 z-40 hidden transition-opacity opacity-0"></div>
 
-        const progJuzEl = document.getElementById('prog-juz');
-        const progTotalEl = document.getElementById('prog-total');
+  <aside id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-slate-50 shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col dark:bg-slate-900">
+    <div class="bg-navy text-amber-500 p-4 flex justify-between items-center shadow-md">
+      <div class="font-bold text-lg tracking-wide">⚙️ Pengaturan</div>
+      <button id="close-btn" class="text-3xl leading-none hover:text-red-400 focus:outline-none text-slate-300" aria-label="Close">&times;</button>
+    </div>
 
-        let currentActiveJuz = 1;
-        let currentJuzData = []; 
-        let pageObserver = null;
-        const TOTAL_AYAH_QURAN = 6236;
+    <div class="p-5 flex flex-col gap-6 overflow-y-auto h-full">
+      <!-- Continue in sidebar (mobile) -->
+      <button id="continue-btn-mobile"
+        class="w-full px-4 py-3 rounded-lg font-bold border-2 border-slate-300 bg-white text-slate-700 transition-colors flex justify-center items-center gap-2 shadow-sm hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-700">
+        ▶ Lanjutkan Bacaan
+      </button>
 
-        function openSidebar() {
-            sidebar.classList.remove('-translate-x-full');
-            sidebarOverlay.classList.remove('hidden');
-            setTimeout(() => sidebarOverlay.classList.remove('opacity-0'), 10); 
-            document.body.style.overflow = 'hidden';
+      <div class="flex flex-col gap-3">
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tampilan Bacaan</label>
+        <button id="toggle-translation" class="w-full px-4 py-3 rounded-lg font-bold border-2 border-slate-300 bg-white text-slate-600 transition-colors flex justify-start items-center gap-3 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
+          <span class="text-xl">🇮🇩</span> <span id="label-trans">Arti: OFF</span>
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tema</label>
+        <button id="toggle-dark" class="w-full px-4 py-3 rounded-lg font-bold border-2 border-slate-300 bg-white text-slate-600 transition-colors flex justify-start items-center gap-3 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
+          <span class="text-xl">🌙</span> <span id="label-dark">Dark: OFF</span>
+        </button>
+      </div>
+
+      <hr class="border-slate-200 dark:border-slate-800">
+
+      <div class="flex flex-col gap-3">
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Navigasi Langsung</label>
+
+        <div class="flex flex-col gap-2">
+          <select id="juz-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700"></select>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <select id="surah-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium disabled:bg-slate-100 disabled:text-slate-400 text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
+            <option value="">-- Menunggu Data --</option>
+          </select>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <select id="page-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium disabled:bg-slate-100 disabled:text-slate-400 text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
+            <option value="">-- Menunggu Data --</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-auto pt-6 pb-2">
+        <div class="text-xs text-center text-slate-400 italic mb-4">
+          *Tap nomor ayat (۝) untuk menandai progress bacaan Anda.
+        </div>
+        <button id="reset-btn" class="w-full px-4 py-3 rounded-lg font-bold border-2 border-red-500 bg-red-50 text-red-600 transition-colors flex justify-center items-center gap-2 shadow-sm hover:bg-red-500 hover:text-white">
+          <span>🗑️ Reset Progress</span>
+        </button>
+
+        <div class="text-[11px] text-center text-slate-400 mt-4 dark:text-slate-500">
+          Offline-first PWA • GitHub Pages
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div id="toast" class="fixed bottom-5 bg-slate-800 text-amber-400 px-4 py-2 rounded-full shadow-lg z-50 text-sm font-medium border border-slate-700">
+    Memuat data...
+  </div>
+
+  <div id="loading" class="mt-20 text-slate-500 font-medium flex flex-col items-center gap-3 dark:text-slate-300">
+    <svg class="animate-spin h-8 w-8 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-label="Loading">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    <span class="text-center text-sm" id="loading-text">Mengunduh ayat & terjemahan...</span>
+  </div>
+
+  <main id="quran-container" class="w-full max-w-2xl px-4 py-6 box-border hidden"></main>
+
+  <script>
+    /**********************
+     * PWA Service Worker
+     **********************/
+    (function registerServiceWorker() {
+      if (!('serviceWorker' in navigator)) return;
+      window.addEventListener('load', async () => {
+        try {
+          // important for GH Pages scope: same folder
+          await navigator.serviceWorker.register('./service-worker.js', { scope: './' });
+          // no toast to avoid noise; this can be toggled
+        } catch (e) {
+          console.warn('SW register failed', e);
+        }
+      });
+    })();
+
+    /**********************
+     * DOM refs
+     **********************/
+    const container = document.getElementById('quran-container');
+    const loading = document.getElementById('loading');
+    const loadingText = document.getElementById('loading-text');
+    const juzSelect = document.getElementById('juz-select');
+    const surahSelect = document.getElementById('surah-select');
+    const pageSelect = document.getElementById('page-select');
+    const toggleTransBtn = document.getElementById('toggle-translation');
+    const toggleDarkBtn = document.getElementById('toggle-dark');
+    const resetBtn = document.getElementById('reset-btn');
+
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    const menuBtn = document.getElementById('menu-btn');
+    const closeBtn = document.getElementById('close-btn');
+
+    const progJuzEl = document.getElementById('prog-juz');
+    const progTotalEl = document.getElementById('prog-total');
+
+    const continueBtn = document.getElementById('continue-btn');
+    const continueBtnMobile = document.getElementById('continue-btn-mobile');
+
+    /**********************
+     * State
+     **********************/
+    let currentActiveJuz = 1;
+    let currentJuzData = [];
+    let pageObserver = null;
+    const TOTAL_AYAH_QURAN = 6236;
+
+    const STORAGE_KEYS = {
+      khatamAyah: 'khatamProgressAyah',
+      lastReadJuz: 'lastReadJuz',
+      lastReadPageID: 'lastReadPageID',
+      transPref: 'transPref',
+      darkPref: 'darkPref',
+      scrollY: 'lastScrollY',        // precise resume
+      scrollJuz: 'lastScrollJuz',    // sanity check
+      lastSeenAt: 'lastSeenAt'       // optional metadata
+    };
+
+    /**********************
+     * Sidebar
+     **********************/
+    function openSidebar() {
+      sidebar.classList.remove('-translate-x-full');
+      sidebarOverlay.classList.remove('hidden');
+      setTimeout(() => sidebarOverlay.classList.remove('opacity-0'), 10);
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+      sidebar.classList.add('-translate-x-full');
+      sidebarOverlay.classList.add('opacity-0');
+      setTimeout(() => sidebarOverlay.classList.add('hidden'), 300);
+      document.body.style.overflow = '';
+    }
+    menuBtn.addEventListener('click', openSidebar);
+    closeBtn.addEventListener('click', closeSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    /**********************
+     * Helpers
+     **********************/
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 2500);
+    }
+
+    function colorizeWaqf(text) {
+      // Merah (Harus berhenti / Mim)
+      text = text.replace(/([\u06D8])/g, '<span class="text-red-600 font-bold">$1</span>');
+      // Pink / Merah Muda (Disarankan berhenti / Qaly, Jeem, Muanaqah)
+      text = text.replace(/([\u06D7\u06DA\u06DB])/g, '<span class="text-rose-300 font-bold text-[1.8rem]">$1</span>');
+      // Kuning (Disarankan lanjut / Saly)
+      text = text.replace(/([\u06D6])/g, '<span class="text-yellow-400 font-bold text-[1.8rem]">$1</span>');
+      // Hijau (Harus lanjut / Lam Alif)
+      text = text.replace(/([\u06D9])/g, '<span class="text-emerald-500 font-bold">$1</span>');
+      return text;
+    }
+
+    function toArabicNumber(num) {
+      return String(num).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+    }
+
+    function scrollToTarget(id) {
+      const element = document.getElementById(id);
+      if (element) {
+        const headerOffset = 100;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+      }
+    }
+
+    function safeNumber(value, fallback = 0) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function normalizeSurahArabicName(arName) {
+      // e.g. "سُورَةُ ٱلْفَاتِحَةِ" -> "الفاتحة" (best effort)
+      if (!arName) return '';
+      return arName
+        .replace(/^سُورَةُ\s+/u, '')
+        .replace(/^سورة\s+/u, '')
+        .trim();
+    }
+
+    /**********************
+     * IndexedDB cache (persistent, offline-first)
+     **********************/
+    const IDB_DB_NAME = 'quran_mobile_miki';
+    const IDB_DB_VERSION = 1;
+    const IDB_STORE = 'juz_cache';
+
+    function idbOpen() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(IDB_DB_NAME, IDB_DB_VERSION);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(IDB_STORE)) {
+            db.createObjectStore(IDB_STORE, { keyPath: 'key' });
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function idbGet(key) {
+      const db = await idbOpen();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, 'readonly');
+        const store = tx.objectStore(IDB_STORE);
+        const req = store.get(key);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function idbSet(key, value) {
+      const db = await idbOpen();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        const store = tx.objectStore(IDB_STORE);
+        const req = store.put({ key, value, savedAt: Date.now() });
+        req.onsuccess = () => resolve(true);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    /**********************
+     * Progress calc
+     **********************/
+    function calculateProgress() {
+      const savedAbsAyah = safeNumber(localStorage.getItem(STORAGE_KEYS.khatamAyah), 0);
+
+      const totalPercent = ((savedAbsAyah / TOTAL_AYAH_QURAN) * 100);
+      progTotalEl.innerText = `${totalPercent.toFixed(1)}%`;
+
+      if (currentJuzData.length > 0) {
+        const minAyahJuz = currentJuzData[0].number;
+        const maxAyahJuz = currentJuzData[currentJuzData.length - 1].number;
+        const totalAyahInJuz = currentJuzData.length;
+
+        let juzPercent = 0;
+        if (savedAbsAyah >= maxAyahJuz) {
+          juzPercent = 100;
+        } else if (savedAbsAyah < minAyahJuz) {
+          juzPercent = 0;
+        } else {
+          juzPercent = ((savedAbsAyah - minAyahJuz + 1) / totalAyahInJuz) * 100;
+        }
+        progJuzEl.innerText = `${juzPercent.toFixed(1)}%`;
+      } else {
+        progJuzEl.innerText = `0%`;
+      }
+
+      // Mark the active boundary
+      document.querySelectorAll('.ayah-marker').forEach(marker => {
+        const absNum = safeNumber(marker.getAttribute('data-abs-num'), -1);
+        if (absNum === savedAbsAyah) marker.classList.add('marked');
+        else marker.classList.remove('marked');
+      });
+    }
+
+    window.markProgress = function(absAyahNumber) {
+      localStorage.setItem(STORAGE_KEYS.khatamAyah, String(absAyahNumber));
+      calculateProgress();
+      showToast('Batas bacaan tersimpan! 🌟');
+    }
+
+    /**********************
+     * Toggle UI helpers
+     **********************/
+    function updateToggleUI(btn, labelId, isActive, labelText) {
+      btn.classList.toggle('bg-navy', isActive);
+      btn.classList.toggle('border-navy', isActive);
+      btn.classList.toggle('text-white', isActive);
+
+      btn.classList.toggle('bg-white', !isActive);
+      btn.classList.toggle('border-slate-300', !isActive);
+      btn.classList.toggle('text-slate-600', !isActive);
+
+      document.getElementById(labelId).innerText = labelText;
+    }
+
+    function toggleTranslation() {
+      document.body.classList.toggle('show-translation');
+      const isActive = document.body.classList.contains('show-translation');
+      updateToggleUI(toggleTransBtn, 'label-trans', isActive, `Arti: ${isActive ? 'ON' : 'OFF'}`);
+      localStorage.setItem(STORAGE_KEYS.transPref, String(isActive));
+    }
+
+    function setDarkMode(isDark) {
+      document.documentElement.classList.toggle('dark', isDark);
+      updateToggleUI(toggleDarkBtn, 'label-dark', isDark, `Dark: ${isDark ? 'ON' : 'OFF'}`);
+      localStorage.setItem(STORAGE_KEYS.darkPref, String(isDark));
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.contains('dark');
+      setDarkMode(!isDark);
+    }
+
+    /**********************
+     * Dropdowns
+     **********************/
+    function initJuzDropdown() {
+      let html = '';
+      for (let i = 1; i <= 30; i++) {
+        html += `<option value="${i}">Juz ${i}</option>`;
+      }
+      juzSelect.innerHTML = html;
+    }
+
+    /**********************
+     * Precise resume (scrollY)
+     **********************/
+    function throttle(fn, waitMs) {
+      let last = 0;
+      let timeout = null;
+      return function(...args) {
+        const now = Date.now();
+        const remaining = waitMs - (now - last);
+        if (remaining <= 0) {
+          last = now;
+          fn.apply(this, args);
+        } else if (!timeout) {
+          timeout = setTimeout(() => {
+            timeout = null;
+            last = Date.now();
+            fn.apply(this, args);
+          }, remaining);
+        }
+      }
+    }
+
+    const saveScrollPositionThrottled = throttle(() => {
+      localStorage.setItem(STORAGE_KEYS.scrollY, String(window.scrollY));
+      localStorage.setItem(STORAGE_KEYS.scrollJuz, String(currentActiveJuz));
+      localStorage.setItem(STORAGE_KEYS.lastSeenAt, String(Date.now()));
+    }, 800);
+
+    window.addEventListener('scroll', saveScrollPositionThrottled, { passive: true });
+
+    function resumeToLastPosition() {
+      const savedJuz = safeNumber(localStorage.getItem(STORAGE_KEYS.lastReadJuz), 0);
+      const savedScrollJuz = safeNumber(localStorage.getItem(STORAGE_KEYS.scrollJuz), 0);
+
+      // If juz mismatch, fallback to page card
+      const savedScrollY = safeNumber(localStorage.getItem(STORAGE_KEYS.scrollY), -1);
+      const savedPageID = localStorage.getItem(STORAGE_KEYS.lastReadPageID);
+
+      if (savedScrollY >= 0 && savedJuz === currentActiveJuz && savedScrollJuz === currentActiveJuz) {
+        // precise restore
+        window.scrollTo({ top: savedScrollY, behavior: 'smooth' });
+        showToast('Lanjutkan posisi terakhir ✅');
+        return;
+      }
+
+      // fallback to page card
+      if (savedPageID && document.getElementById(savedPageID)) {
+        scrollToTarget(savedPageID);
+        showToast('Lanjutkan halaman terakhir ✅');
+        return;
+      }
+
+      showToast('Belum ada posisi terakhir 🙂');
+    }
+
+    continueBtn.addEventListener('click', () => {
+      resumeToLastPosition();
+    });
+    continueBtnMobile.addEventListener('click', () => {
+      closeSidebar();
+      setTimeout(resumeToLastPosition, 150);
+    });
+
+    /**********************
+     * Fetch & render (offline-first)
+     **********************/
+    async function fetchJuzFromNetwork(juzNumber) {
+      // Fetch Arab and Indonesian translation
+      const [resArabic, resTrans] = await Promise.all([
+        fetch(`https://api.alquran.cloud/v1/juz/${juzNumber}/quran-uthmani`, { cache: 'no-store' }),
+        fetch(`https://api.alquran.cloud/v1/juz/${juzNumber}/id.indonesian`, { cache: 'no-store' }),
+      ]);
+
+      if (!resArabic.ok || !resTrans.ok) {
+        throw new Error(`Network fetch failed. Arabic=${resArabic.status}, Trans=${resTrans.status}`);
+      }
+
+      const dataArabic = await resArabic.json();
+      const dataTrans = await resTrans.json();
+
+      return { dataArabic, dataTrans };
+    }
+
+    async function getJuzData(juzNumber) {
+      const cacheKey = `juz-${juzNumber}`;
+
+      // 1) IndexedDB cache first (offline-first)
+      try {
+        const cached = await idbGet(cacheKey);
+        if (cached?.value?.dataArabic && cached?.value?.dataTrans) {
+          return { ...cached.value, source: 'cache' };
+        }
+      } catch (e) {
+        console.warn('IDB read failed', e);
+      }
+
+      // 2) Network fallback, then store in IDB
+      const fresh = await fetchJuzFromNetwork(juzNumber);
+      try {
+        await idbSet(cacheKey, fresh);
+      } catch (e) {
+        console.warn('IDB write failed', e);
+      }
+      return { ...fresh, source: 'network' };
+    }
+
+    function setLoadingState(isLoading, message = 'Mengunduh ayat & terjemahan...') {
+      if (isLoading) {
+        loading.style.display = 'flex';
+        loadingText.innerText = message;
+        container.style.display = 'none';
+      } else {
+        loading.style.display = 'none';
+        container.style.display = 'block';
+      }
+    }
+
+    async function fetchAndRenderJuz(juzNumber, isInitialLoad = false) {
+      setLoadingState(true, 'Menyiapkan data (offline-first)...');
+      container.innerHTML = '';
+
+      surahSelect.innerHTML = '<option value="">-- Menunggu Data --</option>';
+      pageSelect.innerHTML = '<option value="">-- Menunggu Data --</option>';
+      surahSelect.disabled = true;
+      pageSelect.disabled = true;
+
+      try {
+        const { dataArabic, dataTrans, source } = await getJuzData(juzNumber);
+
+        // small UX hint (only sometimes)
+        if (source === 'cache') {
+          showToast('Memuat dari cache (offline-ready) ✅');
         }
 
-        function closeSidebar() {
-            sidebar.classList.add('-translate-x-full');
-            sidebarOverlay.classList.add('opacity-0');
-            setTimeout(() => sidebarOverlay.classList.add('hidden'), 300);
-            document.body.style.overflow = '';
-        }
+        const ayahsArabic = dataArabic.data.ayahs;
+        currentJuzData = ayahsArabic;
 
-        menuBtn.addEventListener('click', openSidebar);
-        closeBtn.addEventListener('click', closeSidebar);
-        sidebarOverlay.addEventListener('click', closeSidebar);
+        let currentPageNumber = null;
+        let currentSurahNumber = null;
+        let htmlContent = '';
 
-        // --- PEWARNAAN WAQAF SESUAI PERMINTAAN ---
-        function colorizeWaqf(text) {
-            // Merah (Harus berhenti / Mim)
-            text = text.replace(/([\u06D8])/g, '<span class="text-red-600 font-bold">$1</span>');
-            // Oranye (Disarankan berhenti / Qaly, Jeem, Muanaqah)
-            text = text.replace(/([\u06D7\u06DA\u06DB])/g, '<span class="text-orange-500 font-bold text-[1.8rem]">$1</span>');
-            // Kuning (Disarankan lanjut / Saly)
-            text = text.replace(/([\u06D6])/g, '<span class="text-yellow-500 font-bold text-[1.8rem]">$1</span>');
-            // Hijau (Harus lanjut / Lam Alif)
-            text = text.replace(/([\u06D9])/g, '<span class="text-green-600 font-bold">$1</span>');
-            return text;
-        }
+        const uniquePages = [];
+        const pageSet = new Set();
+        const uniqueSurahs = []; // {number, englishName, arabicName}
 
-        function toArabicNumber(num) {
-            return num.toString().replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
-        }
+        const surahMap = new Map();
 
-        function scrollToTarget(id) {
-            const element = document.getElementById(id);
-            if (element) {
-                const headerOffset = 100;
-                const elementPosition = element.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                window.scrollTo({ top: offsetPosition, behavior: "smooth" });
-            }
-        }
+        for (let index = 0; index < ayahsArabic.length; index++) {
+          const ayah = ayahsArabic[index];
 
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.innerText = message;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 3000);
-        }
+          // Collect pages in stable order
+          if (!pageSet.has(ayah.page)) {
+            pageSet.add(ayah.page);
+            uniquePages.push(ayah.page);
+          }
 
-        function initJuzDropdown() {
-            for (let i = 1; i <= 30; i++) {
-                juzSelect.innerHTML += `<option value="${i}">Juz ${i}</option>`;
-            }
-        }
-
-        function calculateProgress() {
-            const savedAbsAyah = parseInt(localStorage.getItem('khatamProgressAyah')) || 0;
-            
-            const totalPercent = ((savedAbsAyah / TOTAL_AYAH_QURAN) * 100).toFixed(1);
-            progTotalEl.innerText = `${totalPercent}%`;
-
-            if (currentJuzData.length > 0) {
-                const minAyahJuz = currentJuzData[0].number;
-                const maxAyahJuz = currentJuzData[currentJuzData.length - 1].number;
-                const totalAyahInJuz = currentJuzData.length;
-
-                let juzPercent = 0;
-                if (savedAbsAyah >= maxAyahJuz) {
-                    juzPercent = 100;
-                } else if (savedAbsAyah < minAyahJuz) {
-                    juzPercent = 0;   
-                } else {
-                    juzPercent = (((savedAbsAyah - minAyahJuz + 1) / totalAyahInJuz) * 100).toFixed(1);
-                }
-                progJuzEl.innerText = `${juzPercent}%`;
-            }
-
-            document.querySelectorAll('.ayah-marker').forEach(marker => {
-                const absNum = parseInt(marker.getAttribute('data-abs-num'));
-                if (absNum === savedAbsAyah) {
-                    marker.classList.add('marked');
-                } else {
-                    marker.classList.remove('marked');
-                }
+          // Collect surahs (stable order)
+          if (!surahMap.has(ayah.surah.number)) {
+            surahMap.set(ayah.surah.number, true);
+            uniqueSurahs.push({
+              number: ayah.surah.number,
+              englishName: ayah.surah.englishName,
+              arabicName: normalizeSurahArabicName(ayah.surah.name)
             });
-        }
+          }
 
-        window.markProgress = function(absAyahNumber) {
-            localStorage.setItem('khatamProgressAyah', absAyahNumber);
-            calculateProgress();
-            showToast('Batas bacaan tersimpan! 🌟');
-        }
+          // Page card boundary
+          if (ayah.page !== currentPageNumber) {
+            if (currentPageNumber !== null) htmlContent += `</div></div>`;
+            htmlContent += `
+              <div class="quran-page-card bg-kertas mb-8 rounded-xl shadow-md border border-slate-300 overflow-hidden dark:border-slate-800 dark:bg-slate-900/70"
+                   id="page-${ayah.page}">
+                <div class="bg-slate-100 text-slate-600 text-center font-bold py-2 border-b border-slate-300 text-sm tracking-wide flex justify-between px-4 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800">
+                  <span>Juz ${juzNumber}</span>
+                  <span>Halaman ${ayah.page}</span>
+                </div>
+                <div class="p-5 font-quran text-[2.2rem] leading-[2.6] quran-text text-navy dark:text-slate-100">`;
+            currentPageNumber = ayah.page;
+          }
 
-        async function fetchJuz(juzNumber, isInitialLoad = false) {
-            loading.style.display = 'flex';
-            container.style.display = 'none';
-            container.innerHTML = '';
-            surahSelect.innerHTML = '<option value="">-- Menunggu Data --</option>';
-            pageSelect.innerHTML = '<option value="">-- Menunggu Data --</option>';
-            surahSelect.disabled = true;
-            pageSelect.disabled = true;
+          // Surah boundary
+          if (ayah.surah.number !== currentSurahNumber) {
+            const surahName = normalizeSurahArabicName(ayah.surah.name);
+            htmlContent += `
+              <div id="surah-${ayah.surah.number}"
+                   class="surah-header-block text-2xl text-amber-600 border-y-2 border-amber-200 py-3 mx-0 my-5 bg-amber-50/30 dark:bg-amber-500/10 dark:border-amber-500/20">
+                سورة ${surahName}
+              </div>`;
 
-            try {
-                const [resArabic, resLatin, resTrans] = await Promise.all([
-                    fetch(`https://api.alquran.cloud/v1/juz/${juzNumber}/quran-uthmani`),
-                    fetch(`https://api.alquran.cloud/v1/juz/${juzNumber}/en.transliteration`),
-                    fetch(`https://api.alquran.cloud/v1/juz/${juzNumber}/id.indonesian`)
-                ]);
-                
-                const dataArabic = await resArabic.json();
-                const dataLatin = await resLatin.json();
-                const dataTrans = await resTrans.json();
-                
-                const ayahsArabic = dataArabic.data.ayahs;
-                currentJuzData = ayahsArabic; 
-                
-                let currentPageNumber = null;
-                let currentSurahNumber = null;
-                let htmlContent = '';
-                
-                let uniquePages = new Set();
-                let uniqueSurahs = new Map(); 
-
-                ayahsArabic.forEach((ayah, index) => {
-                    uniquePages.add(ayah.page);
-                    if (!uniqueSurahs.has(ayah.surah.number)) {
-                        uniqueSurahs.set(ayah.surah.number, ayah.surah.englishName);
-                    }
-
-                    if (ayah.page !== currentPageNumber) {
-                        if (currentPageNumber !== null) htmlContent += `</div></div>`; 
-                        
-                        htmlContent += `
-                            <div class="quran-page-card bg-kertas mb-8 rounded-xl shadow-md border border-slate-300 overflow-hidden" id="page-${ayah.page}">
-                                <div class="bg-slate-100 text-slate-600 text-center font-bold py-2 border-b border-slate-300 text-sm tracking-wide flex justify-between px-4">
-                                    <span>Juz ${juzNumber}</span>
-                                    <span>Halaman ${ayah.page}</span>
-                                </div>
-                                <div class="p-5 font-quran text-[2.2rem] leading-[2.6] quran-text text-navy">`;
-                        currentPageNumber = ayah.page;
-                    }
-
-                    if (ayah.surah.number !== currentSurahNumber) {
-                        htmlContent += `
-                            <div id="surah-${ayah.surah.number}" class="surah-header-block text-2xl text-amber-600 border-y-2 border-amber-200 py-3 mx-0 my-5 bg-amber-50/30">
-                                سورة ${ayah.surah.name.replace('سُورَةُ ', '')}
-                            </div>`;
-                        
-                        if (ayah.surah.number !== 1 && ayah.surah.number !== 9) {
-                            htmlContent += `<span class="bismillah-block text-3xl mb-5 text-slate-800">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</span>`;
-                        }
-                        currentSurahNumber = ayah.surah.number;
-                    }
-
-                    let textAr = colorizeWaqf(ayah.text);
-                    let textLat = dataLatin.data.ayahs[index].text;
-                    let textId = dataTrans.data.ayahs[index].text;
-
-                    if (ayah.numberInSurah === 1 && ayah.surah.number !== 1) {
-                        textAr = textAr.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ', '');
-                        textLat = textLat.replace(/^Bismillaahir Rahmaanir Raheem\s*/i, '');
-                    }
-
-                    htmlContent += `
-                        <span class="ayah-container" id="ayah-${ayah.number}">
-                            <span class="inline">${textAr} <span class="ayah-marker text-2xl text-slate-400 mx-1" data-abs-num="${ayah.number}" onclick="markProgress(${ayah.number})">۝${toArabicNumber(ayah.numberInSurah)}</span></span>
-                            <div class="latin-text">${textLat}</div>
-                            <div class="translation-text">"${textId}"</div>
-                        </span>`;
-                });
-
-                htmlContent += `</div></div>`; 
-                container.innerHTML = htmlContent;
-                loading.style.display = 'none';
-                container.style.display = 'block';
-
-                surahSelect.innerHTML = '<option value="">-- Pilih Surah --</option>';
-                uniqueSurahs.forEach((latinName, number) => {
-                    surahSelect.innerHTML += `<option value="surah-${number}">${number}. ${latinName}</option>`;
-                });
-                
-                pageSelect.innerHTML = '<option value="">-- Pilih Halaman --</option>';
-                uniquePages.forEach(page => {
-                    pageSelect.innerHTML += `<option value="page-${page}">Halaman ${page}</option>`;
-                });
-
-                surahSelect.disabled = false;
-                pageSelect.disabled = false;
-                juzSelect.value = juzNumber;
-
-                calculateProgress(); 
-
-                if (pageObserver) pageObserver.disconnect();
-                pageObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            localStorage.setItem('lastReadJuz', juzNumber);
-                            localStorage.setItem('lastReadPageID', entry.target.id);
-                            const pageNumMatch = entry.target.id.match(/\d+/);
-                            if (pageNumMatch) pageSelect.value = entry.target.id;
-                        }
-                    });
-                }, { root: null, rootMargin: '0px', threshold: 0.3 });
-
-                document.querySelectorAll('.quran-page-card').forEach(card => pageObserver.observe(card));
-
-                if (isInitialLoad) {
-                    const savedPageID = localStorage.getItem('lastReadPageID');
-                    if (savedPageID && document.getElementById(savedPageID)) {
-                        setTimeout(() => {
-                            scrollToTarget(savedPageID);
-                            pageSelect.value = savedPageID;
-                        }, 500);
-                    }
-                } else {
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                }
-
-            } catch (error) {
-                loading.innerHTML = `<span class="text-red-500 font-bold">Gagal memuat. Cek koneksi internet.</span>`;
-                console.error(error);
+            // Bismillah (skip for 1 and 9)
+            if (ayah.surah.number !== 1 && ayah.surah.number !== 9) {
+              htmlContent += `<span class="bismillah-block text-3xl mb-5 text-slate-800 dark:text-slate-100">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</span>`;
             }
+
+            currentSurahNumber = ayah.surah.number;
+          }
+
+          // Ayah text (Arabic + translation)
+          let textAr = colorizeWaqf(ayah.text);
+          const textId = dataTrans.data.ayahs[index]?.text ?? '';
+
+          // remove bismillah from ayah 1 except Al-Fatihah
+          if (ayah.numberInSurah === 1 && ayah.surah.number !== 1) {
+            textAr = textAr.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ', '');
+          }
+
+          htmlContent += `
+            <span class="ayah-container" id="ayah-${ayah.number}">
+              <span class="inline">${textAr}
+                <span class="ayah-marker text-2xl text-slate-400 mx-1 dark:text-slate-500"
+                      data-abs-num="${ayah.number}"
+                      onclick="markProgress(${ayah.number})">۝${toArabicNumber(ayah.numberInSurah)}</span>
+              </span>
+              <div class="translation-text">"${textId}"</div>
+            </span>`;
         }
 
-        function updateToggleUI(btn, labelId, isActive, labelText) {
-            btn.classList.toggle('bg-navy', isActive);
-            btn.classList.toggle('border-navy', isActive);
-            btn.classList.toggle('text-white', isActive);
-            btn.classList.toggle('bg-white', !isActive);
-            btn.classList.toggle('border-slate-300', !isActive);
-            btn.classList.toggle('text-slate-600', !isActive);
-            document.getElementById(labelId).innerText = labelText;
+        htmlContent += `</div></div>`;
+        container.innerHTML = htmlContent;
+
+        // Populate dropdowns (surah includes Arabic)
+        surahSelect.innerHTML = '<option value="">-- Pilih Surah --</option>';
+        for (const s of uniqueSurahs) {
+          const label = `${s.number}. ${s.englishName} (${s.arabicName || '—'})`;
+          surahSelect.innerHTML += `<option value="surah-${s.number}">${label}</option>`;
         }
 
-        function toggleLatin() {
-            document.body.classList.toggle('show-latin');
-            const isActive = document.body.classList.contains('show-latin');
-            updateToggleUI(toggleLatinBtn, 'label-latin', isActive, `Latin: ${isActive ? 'ON' : 'OFF'}`);
-            localStorage.setItem('latinPref', isActive);
+        pageSelect.innerHTML = '<option value="">-- Pilih Halaman --</option>';
+        for (const page of uniquePages) {
+          pageSelect.innerHTML += `<option value="page-${page}">Halaman ${page}</option>`;
         }
 
-        function toggleTranslation() {
-            document.body.classList.toggle('show-translation');
-            const isActive = document.body.classList.contains('show-translation');
-            updateToggleUI(toggleTransBtn, 'label-trans', isActive, `Arti: ${isActive ? 'ON' : 'OFF'}`);
-            localStorage.setItem('transPref', isActive);
-        }
+        surahSelect.disabled = false;
+        pageSelect.disabled = false;
+        juzSelect.value = String(juzNumber);
 
-        // --- FUNGSI RESET CACHE ---
-        resetBtn.addEventListener('click', () => {
-            if(confirm('⚠️ PERINGATAN\nApakah Anda yakin ingin menghapus semua progress khatam, posisi terakhir baca, dan pengaturan?')) {
-                localStorage.clear();
-                window.location.reload();
+        // Progress update
+        calculateProgress();
+
+        // IntersectionObserver for page tracking
+        if (pageObserver) pageObserver.disconnect();
+        pageObserver = new IntersectionObserver((entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+
+            localStorage.setItem(STORAGE_KEYS.lastReadJuz, String(juzNumber));
+            localStorage.setItem(STORAGE_KEYS.lastReadPageID, entry.target.id);
+
+            // keep page dropdown in sync
+            pageSelect.value = entry.target.id;
+          }
+        }, { root: null, rootMargin: '0px', threshold: 0.3 });
+
+        document.querySelectorAll('.quran-page-card').forEach(card => pageObserver.observe(card));
+
+        setLoadingState(false);
+
+        // Initial load: restore last position (precise) if same juz, else pageID
+        if (isInitialLoad) {
+          const savedJuz = safeNumber(localStorage.getItem(STORAGE_KEYS.lastReadJuz), 0);
+          const savedScrollJuz = safeNumber(localStorage.getItem(STORAGE_KEYS.scrollJuz), 0);
+          const savedScrollY = safeNumber(localStorage.getItem(STORAGE_KEYS.scrollY), -1);
+          const savedPageID = localStorage.getItem(STORAGE_KEYS.lastReadPageID);
+
+          // show Continue button when we have something to continue
+          const canContinue = Boolean(savedScrollY >= 0 || (savedPageID && savedJuz));
+          continueBtn.classList.toggle('hidden', !canContinue);
+
+          setTimeout(() => {
+            if (savedScrollY >= 0 && savedJuz === juzNumber && savedScrollJuz === juzNumber) {
+              window.scrollTo({ top: savedScrollY, behavior: 'auto' });
+              pageSelect.value = localStorage.getItem(STORAGE_KEYS.lastReadPageID) || pageSelect.value;
+            } else if (savedPageID && document.getElementById(savedPageID)) {
+              scrollToTarget(savedPageID);
+              pageSelect.value = savedPageID;
             }
-        });
-
-        function initApp() {
-            initJuzDropdown();
-
-            const savedJuz = localStorage.getItem('lastReadJuz');
-            if (savedJuz) currentActiveJuz = parseInt(savedJuz);
-            
-            if (localStorage.getItem('latinPref') === 'true') toggleLatin();
-            if (localStorage.getItem('transPref') === 'true') toggleTranslation();
-
-            fetchJuz(currentActiveJuz, true);
-
-            juzSelect.addEventListener('change', (e) => {
-                if (e.target.value != currentActiveJuz) {
-                    currentActiveJuz = e.target.value;
-                    fetchJuz(currentActiveJuz, false);
-                    closeSidebar();
-                }
-            });
-            surahSelect.addEventListener('change', (e) => {
-                if (e.target.value) {
-                    scrollToTarget(e.target.value);
-                    pageSelect.selectedIndex = 0; 
-                    closeSidebar();
-                }
-            });
-            pageSelect.addEventListener('change', (e) => {
-                if (e.target.value) {
-                    scrollToTarget(e.target.value);
-                    surahSelect.selectedIndex = 0;
-                    closeSidebar();
-                }
-            });
-            
-            toggleLatinBtn.addEventListener('click', toggleLatin);
-            toggleTransBtn.addEventListener('click', toggleTranslation);
+          }, 250);
+        } else {
+          // when switching juz, scroll top
+          window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
-        initApp();
-    </script>
+      } catch (error) {
+        console.error(error);
+        setLoadingState(true);
+        loadingText.innerText = 'Gagal memuat. Cek koneksi internet (atau cache belum ada untuk juz ini).';
+        showToast('Gagal memuat 😕');
+      }
+    }
+
+    /**********************
+     * Reset
+     **********************/
+    resetBtn.addEventListener('click', async () => {
+      if (!confirm('⚠️ PERINGATAN\nApakah Anda yakin ingin menghapus semua progress khatam, posisi terakhir baca, dan pengaturan?')) return;
+
+      // clear localStorage
+      localStorage.clear();
+
+      // clear IndexedDB cache as well
+      try {
+        const db = await idbOpen();
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).clear();
+      } catch (e) {
+        console.warn('IDB clear failed', e);
+      }
+
+      window.location.reload();
+    });
+
+    /**********************
+     * Init
+     **********************/
+    function initApp() {
+      initJuzDropdown();
+
+      // Restore prefs
+      if (localStorage.getItem(STORAGE_KEYS.transPref) === 'true') {
+        document.body.classList.add('show-translation');
+        updateToggleUI(toggleTransBtn, 'label-trans', true, 'Arti: ON');
+      }
+
+      const darkPref = localStorage.getItem(STORAGE_KEYS.darkPref);
+      if (darkPref === 'true') setDarkMode(true);
+      else setDarkMode(false);
+
+      toggleTransBtn.addEventListener('click', toggleTranslation);
+      toggleDarkBtn.addEventListener('click', toggleDarkMode);
+
+      // Restore juz
+      const savedJuz = safeNumber(localStorage.getItem(STORAGE_KEYS.lastReadJuz), 1);
+      currentActiveJuz = savedJuz >= 1 && savedJuz <= 30 ? savedJuz : 1;
+
+      // Load juz
+      fetchAndRenderJuz(currentActiveJuz, true);
+
+      // Dropdown events
+      juzSelect.addEventListener('change', (e) => {
+        const nextJuz = safeNumber(e.target.value, currentActiveJuz);
+        if (nextJuz !== currentActiveJuz) {
+          currentActiveJuz = nextJuz;
+          fetchAndRenderJuz(currentActiveJuz, false);
+          closeSidebar();
+        }
+      });
+
+      surahSelect.addEventListener('change', (e) => {
+        if (e.target.value) {
+          scrollToTarget(e.target.value);
+          pageSelect.selectedIndex = 0;
+          closeSidebar();
+        }
+      });
+
+      pageSelect.addEventListener('change', (e) => {
+        if (e.target.value) {
+          scrollToTarget(e.target.value);
+          surahSelect.selectedIndex = 0;
+          closeSidebar();
+        }
+      });
+    }
+
+    initApp();
+  </script>
 </body>
 </html>
