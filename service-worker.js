@@ -1,10 +1,9 @@
 /* service-worker.js
- * Offline-first PWA for GitHub Pages (/quran-mobile-miki/)
- * - Precache app shell
- * - Runtime cache for AlQuran Cloud API (stale-while-revalidate)
+ * Offline-first PWA for GitHub Pages
  */
 
-const CACHE_VERSION = 'v10';
+// UBAH ANGKA INI SETIAP KALI ANDA PUSH KE GITHUB AGAR APP UPDATE
+const CACHE_VERSION = 'v11'; 
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `runtime-${CACHE_VERSION}`;
 
@@ -39,19 +38,24 @@ self.addEventListener('activate', (event) => {
   })());
 });
 
+// Listener untuk perintah "Update Now" dari index.html
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
   if (req.method !== 'GET') return;
 
-  // App shell: cache-first
   if (url.origin === location.origin && url.pathname.startsWith(BASE_PATH)) {
     event.respondWith(cacheFirst(req));
     return;
   }
 
-  // AlQuran Cloud API: stale-while-revalidate
   if (url.origin === 'https://api.alquran.cloud') {
     event.respondWith(staleWhileRevalidate(req));
     return;

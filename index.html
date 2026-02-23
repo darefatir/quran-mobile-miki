@@ -5,11 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Qur'an Mobile - Premium Blue Gold</title>
 
-  <!-- PWA -->
   <link rel="manifest" href="./manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
 
-  <!-- iOS PWA polish -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Qur'an Miki">
@@ -57,6 +55,7 @@
     body.show-translation .ayah-container {
       display: block; margin-bottom: 1.5rem; border-bottom: 1px dashed #cbd5e1; padding-bottom: 1rem;
     }
+    
     body.show-translation .translation-text {
       display: block;
       direction: ltr;
@@ -65,9 +64,14 @@
       font-family: system-ui, sans-serif;
       line-height: var(--translation-line-height);
       font-size: var(--translation-font-size);
-      color: #1e3a8a;
+      color: #1e3a8a; /* Default Blue */
       font-style: italic;
       margin-top: 1rem;
+    }
+
+    /* REVISI DARK MODE FONT COLOR: Menjadi Putih Bersih */
+    .dark body.show-translation .translation-text {
+      color: #f8fafc !important; 
     }
 
     .surah-header-block, .bismillah-block {
@@ -87,15 +91,23 @@
     #toast { visibility: hidden; opacity: 0; transition: opacity 0.5s, visibility 0.5s; }
     #toast.show { visibility: visible; opacity: 1; }
 
-    /* small top banner for iOS install help */
     #ios-install-banner { display: none; }
     #ios-install-banner.show { display: block; }
+
+    /* Custom Scrollbar for Dropdown */
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
   </style>
 </head>
 
 <body class="bg-slate-100 text-slate-800 font-sans antialiased flex flex-col items-center min-h-screen relative overflow-x-hidden dark:bg-slate-950 dark:text-slate-100">
 
-  <!-- iOS install helper banner -->
+  <div id="update-banner" class="hidden w-full bg-blue-600 text-white z-50 p-3 shadow-lg flex justify-between items-center transition-all sticky top-0">
+    <span class="text-sm font-semibold flex items-center gap-2">✨ <span>App Update Available!</span></span>
+    <button id="update-btn" class="bg-white text-blue-600 px-3 py-1.5 rounded-md text-xs font-bold shadow-sm hover:bg-blue-50 transition active:scale-95">Update Now</button>
+  </div>
+
   <div id="ios-install-banner" class="w-full bg-amber-500/15 text-slate-900 dark:text-slate-100 border-b border-amber-500/30">
     <div class="max-w-2xl mx-auto px-4 py-2 flex items-start gap-3 text-sm">
       <div class="mt-0.5">📲</div>
@@ -114,7 +126,6 @@
         <div class="font-bold text-lg hidden sm:block text-amber-500">📖 Qur'an Mobile</div>
         <div class="font-bold text-lg sm:hidden text-amber-500">📖 Qur'an</div>
 
-        <!-- Continue + streak -->
         <button id="continue-btn"
           class="ml-2 hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-600/60 text-xs font-semibold text-slate-200 hover:bg-white/10 transition"
           title="Continue from last position">
@@ -152,39 +163,56 @@
       <button id="close-btn" class="text-3xl leading-none hover:text-red-400 focus:outline-none text-slate-300" aria-label="Close">&times;</button>
     </div>
 
-    <div class="p-5 flex flex-col gap-5 overflow-y-auto h-full">
+    <div class="p-5 flex flex-col gap-5 overflow-y-auto h-full custom-scrollbar">
 
-      <!-- Continue on mobile -->
       <button id="continue-btn-mobile"
         class="w-full px-4 py-3 rounded-lg font-bold border-2 border-slate-300 bg-white text-slate-700 transition-colors flex justify-center items-center gap-2 shadow-sm hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-700">
         ▶ Continue Reading
       </button>
 
-      <!-- Translation ON/OFF -->
-      <div class="flex flex-col gap-2">
+      <div class="flex flex-col gap-2 bg-slate-100 p-3 rounded-lg border border-slate-200 dark:bg-slate-800/50 dark:border-slate-700">
+        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Quick Navigation</label>
+
+        <div class="relative w-full">
+            <button id="custom-surah-btn" class="w-full p-2.5 flex justify-between items-center rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600">
+                <span id="custom-surah-label" class="truncate">-- Search Global Surah --</span>
+                <span class="text-xs ml-2">▼</span>
+            </button>
+            <div id="custom-surah-menu" class="hidden absolute top-full mt-1 left-0 w-full bg-white border border-slate-300 rounded-lg shadow-xl z-[60] dark:bg-slate-800 dark:border-slate-600 overflow-hidden">
+                <div class="p-2 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                    <input type="text" id="custom-surah-search" placeholder="Type surah name..." class="w-full p-2 text-sm rounded border border-slate-300 focus:border-amber-500 outline-none dark:bg-slate-800 dark:border-slate-600 dark:text-white dark:focus:border-amber-500">
+                </div>
+                <ul id="custom-surah-list" class="max-h-56 overflow-y-auto custom-scrollbar text-sm dark:text-slate-200 bg-white dark:bg-slate-800">
+                    </ul>
+            </div>
+        </div>
+
+        <div class="flex gap-2">
+            <select id="juz-select" class="w-1/2 p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600"></select>
+            <select id="page-select" class="w-1/2 p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium disabled:bg-slate-100 disabled:text-slate-400 text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600">
+              <option value="">-- Page --</option>
+            </select>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2 mt-2">
         <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Reading Mode</label>
         <button id="toggle-translation" class="w-full px-4 py-3 rounded-lg font-bold border-2 border-slate-300 bg-white text-slate-600 transition-colors flex justify-start items-center gap-3 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
           <span class="text-xl">🈯</span> <span id="label-trans">Translation: OFF</span>
         </button>
       </div>
 
-      <!-- Translation language -->
       <div class="flex flex-col gap-2">
         <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Translation Language</label>
         <select id="translation-lang" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
           <option value="id.indonesian">🇮🇩 Bahasa Indonesia</option>
           <option value="en.sahih">🇬🇧 English (Sahih Intl.)</option>
         </select>
-        <div class="text-[11px] text-slate-500 dark:text-slate-400">
-          Changing language will reload the current Juz for that translation.
-        </div>
       </div>
 
-      <!-- Font size sliders -->
       <div class="flex flex-col gap-3">
         <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Font Size</label>
 
-        <!-- Arabic slider -->
         <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:bg-slate-800 dark:border-slate-700">
           <div class="flex justify-between items-center mb-2">
             <div class="font-semibold text-sm text-slate-700 dark:text-slate-100">Arabic</div>
@@ -192,10 +220,8 @@
           </div>
           <input id="arabic-size-slider" type="range" min="1.6" max="3.2" step="0.05" value="2.2"
                  class="w-full accent-amber-500">
-          <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-2">Affects Arabic text only.</div>
         </div>
 
-        <!-- Translation slider (only visible when translation ON) -->
         <div id="translation-size-box" class="hidden rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:bg-slate-800 dark:border-slate-700">
           <div class="flex justify-between items-center mb-2">
             <div class="font-semibold text-sm text-slate-700 dark:text-slate-100">Translation</div>
@@ -203,11 +229,9 @@
           </div>
           <input id="translation-size-slider" type="range" min="0.85" max="1.6" step="0.05" value="1.0"
                  class="w-full accent-amber-500">
-          <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-2">Affects translation text only.</div>
         </div>
       </div>
 
-      <!-- Theme -->
       <div class="flex flex-col gap-2">
         <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Theme</label>
         <button id="toggle-dark" class="w-full px-4 py-3 rounded-lg font-bold border-2 border-slate-300 bg-white text-slate-600 transition-colors flex justify-start items-center gap-3 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
@@ -217,9 +241,8 @@
 
       <hr class="border-slate-200 dark:border-slate-800">
 
-      <!-- Offline download -->
       <div class="flex flex-col gap-2">
-        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Offline</label>
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Offline Library</label>
 
         <button id="offline-current"
           class="w-full px-4 py-3 rounded-lg font-bold border-2 border-amber-500 bg-amber-50 text-amber-700 transition-colors flex justify-center items-center gap-2 shadow-sm hover:bg-amber-500 hover:text-white dark:bg-amber-500/10 dark:text-amber-200 dark:border-amber-500/40 dark:hover:bg-amber-500 dark:hover:text-slate-900">
@@ -228,44 +251,21 @@
 
         <button id="offline-all"
           class="w-full px-4 py-3 rounded-lg font-bold border-2 border-slate-300 bg-white text-slate-700 transition-colors flex justify-center items-center gap-2 shadow-sm hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-700">
-          📦 Download Offline (Juz 1–30)
+          📦 Download Full Qur'an
         </button>
 
-        <div id="offline-progress" class="hidden text-[12px] text-slate-600 dark:text-slate-300">
+        <div id="offline-progress" class="hidden text-[12px] text-slate-600 dark:text-slate-300 mt-2">
           <div class="flex justify-between">
             <span id="offline-progress-text">Preparing...</span>
             <span id="offline-progress-pct">0%</span>
           </div>
-          <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden mt-2 dark:bg-slate-800">
+          <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden mt-1 dark:bg-slate-700">
             <div id="offline-progress-bar" class="h-full bg-amber-500 w-0"></div>
           </div>
         </div>
-
-        <div class="text-[11px] text-slate-500 dark:text-slate-400">
-          Tip: Download on Wi-Fi first, then read without internet.
-        </div>
-      </div>
-
-      <!-- Navigation -->
-      <div class="flex flex-col gap-2">
-        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Quick Navigation</label>
-
-        <select id="juz-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700"></select>
-
-        <select id="surah-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium disabled:bg-slate-100 disabled:text-slate-400 text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
-          <option value="">-- Waiting for Data --</option>
-        </select>
-
-        <select id="page-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium disabled:bg-slate-100 disabled:text-slate-400 text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
-          <option value="">-- Waiting for Data --</option>
-        </select>
       </div>
 
       <div class="mt-auto pt-4 pb-2">
-        <div class="text-xs text-center text-slate-400 italic mb-4">
-          *Tap the ayah marker (۝) to save your reading boundary.
-        </div>
-
         <button id="reset-btn" class="w-full px-4 py-3 rounded-lg font-bold border-2 border-red-500 bg-red-50 text-red-600 transition-colors flex justify-center items-center gap-2 shadow-sm hover:bg-red-500 hover:text-white">
           🗑️ Reset Data
         </button>
@@ -293,15 +293,73 @@
 
   <script>
     /**********************
-     * PWA Service Worker
+     * Global Surah Metadata (1-114) for Search Box 
+     * [id, "English/Latin Name", Starting Juz]
      **********************/
+    const SURAH_META = [
+      [1,"Al-Fatihah",1],[2,"Al-Baqarah",1],[3,"Ali 'Imran",3],[4,"An-Nisa",4],[5,"Al-Ma'idah",6],
+      [6,"Al-An'am",7],[7,"Al-A'raf",8],[8,"Al-Anfal",9],[9,"At-Tawbah",10],[10,"Yunus",11],
+      [11,"Hud",11],[12,"Yusuf",12],[13,"Ar-Ra'd",13],[14,"Ibrahim",13],[15,"Al-Hijr",14],
+      [16,"An-Nahl",14],[17,"Al-Isra",15],[18,"Al-Kahf",15],[19,"Maryam",16],[20,"Taha",16],
+      [21,"Al-Anbiya",17],[22,"Al-Hajj",17],[23,"Al-Mu'minun",18],[24,"An-Nur",18],[25,"Al-Furqan",18],
+      [26,"Ash-Shu'ara",19],[27,"An-Naml",19],[28,"Al-Qasas",20],[29,"Al-'Ankabut",20],[30,"Ar-Rum",21],
+      [31,"Luqman",21],[32,"As-Sajdah",21],[33,"Al-Ahzab",21],[34,"Saba",22],[35,"Fatir",22],
+      [36,"Ya-Sin",22],[37,"As-Saffat",23],[38,"Sad",23],[39,"Az-Zumar",23],[40,"Ghafir",24],
+      [41,"Fussilat",24],[42,"Ash-Shura",25],[43,"Az-Zukhruf",25],[44,"Ad-Dukhan",25],[45,"Al-Jathiyah",25],
+      [46,"Al-Ahqaf",26],[47,"Muhammad",26],[48,"Al-Fath",26],[49,"Al-Hujurat",26],[50,"Qaf",26],
+      [51,"Ad-Dhariyat",26],[52,"At-Tur",27],[53,"An-Najm",27],[54,"Al-Qamar",27],[55,"Ar-Rahman",27],
+      [56,"Al-Waqi'ah",27],[57,"Al-Hadid",27],[58,"Al-Mujadila",28],[59,"Al-Hashr",28],[60,"Al-Mumtahanah",28],
+      [61,"As-Saff",28],[62,"Al-Jumu'ah",28],[63,"Al-Munafiqun",28],[64,"At-Taghabun",28],[65,"At-Talaq",28],
+      [66,"At-Tahrim",28],[67,"Al-Mulk",29],[68,"Al-Qalam",29],[69,"Al-Haqqah",29],[70,"Al-Ma'arij",29],
+      [71,"Nuh",29],[72,"Al-Jinn",29],[73,"Al-Muzzammil",29],[74,"Al-Muddaththir",29],[75,"Al-Qiyamah",29],
+      [76,"Al-Insan",29],[77,"Al-Mursalat",29],[78,"An-Naba",30],[79,"An-Nazi'at",30],[80,"'Abasa",30],
+      [81,"At-Takwir",30],[82,"Al-Infitar",30],[83,"Al-Mutaffifin",30],[84,"Al-Inshiqaq",30],[85,"Al-Buruj",30],
+      [86,"At-Tariq",30],[87,"Al-A'la",30],[88,"Al-Ghashiyah",30],[89,"Al-Fajr",30],[90,"Al-Balad",30],
+      [91,"Ash-Shams",30],[92,"Al-Lail",30],[93,"Ad-Duha",30],[94,"Ash-Sharh",30],[95,"At-Tin",30],
+      [96,"Al-'Alaq",30],[97,"Al-Qadr",30],[98,"Al-Bayyinah",30],[99,"Az-Zalzalah",30],[100,"Al-'Adiyat",30],
+          [101,"Al-Qari'ah",30],[102,"At-Takathur",30],[103,"Al-'Asr",30],[104,"Al-Humazah",30],[105,"Al-Fil",30],
+      [106,"Quraish",30],[107,"Al-Ma'un",30],[108,"Al-Kawthar",30],[109,"Al-Kafirun",30],[110,"An-Nasr",30],
+      [111,"Al-Masad",30],[112,"Al-Ikhlas",30],[113,"Al-Falaq",30],[114,"An-Nas",30]
+    ];
+
+    /**********************
+     * PWA Service Worker & Updates
+     **********************/
+    let newWorker = null;
+
     (function registerServiceWorker() {
       if (!('serviceWorker' in navigator)) return;
       window.addEventListener('load', async () => {
-        try { await navigator.serviceWorker.register('./service-worker.js', { scope: './' }); }
+        try { 
+          const reg = await navigator.serviceWorker.register('./service-worker.js', { scope: './' }); 
+          
+          // Memantau jika ada SW baru (Update Github)
+          reg.addEventListener('updatefound', () => {
+             newWorker = reg.installing;
+             newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                   // Tampilkan Banner Update
+                   document.getElementById('update-banner').classList.remove('hidden');
+                }
+             });
+          });
+        }
         catch (e) { console.warn('SW register failed', e); }
       });
+
+      // Reload saat tombol Update diklik
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          window.location.reload();
+          refreshing = true;
+        }
+      });
     })();
+
+    document.getElementById('update-btn').addEventListener('click', () => {
+       if (newWorker) newWorker.postMessage({ action: 'skipWaiting' });
+    });
 
     /**********************
      * DOM refs
@@ -311,8 +369,13 @@
     const loadingText = document.getElementById('loading-text');
 
     const juzSelect = document.getElementById('juz-select');
-    const surahSelect = document.getElementById('surah-select');
     const pageSelect = document.getElementById('page-select');
+
+    // Custom Surah Dropdown Refs
+    const customSurahBtn = document.getElementById('custom-surah-btn');
+    const customSurahMenu = document.getElementById('custom-surah-menu');
+    const customSurahSearch = document.getElementById('custom-surah-search');
+    const customSurahList = document.getElementById('custom-surah-list');
 
     const toggleTransBtn = document.getElementById('toggle-translation');
     const toggleDarkBtn = document.getElementById('toggle-dark');
@@ -369,15 +432,9 @@
       scrollY: 'lastScrollY',
       scrollJuz: 'lastScrollJuz',
       lastSeenAt: 'lastSeenAt',
-
-      // streak
       streakCount: 'streakCount',
-      lastReadDate: 'lastReadDate', // YYYY-MM-DD
-
-      // iOS banner dismissed
+      lastReadDate: 'lastReadDate', 
       iosBannerDismissed: 'iosBannerDismissed',
-
-      // font sizes
       arabicFontRem: 'arabicFontRem',
       translationFontRem: 'translationFontRem',
     };
@@ -400,12 +457,68 @@
     function closeSidebar() {
       sidebar.classList.add('-translate-x-full');
       sidebarOverlay.classList.add('opacity-0');
+      // Tutup custom dropdown jika terbuka
+      customSurahMenu.classList.add('hidden');
       setTimeout(() => sidebarOverlay.classList.add('hidden'), 300);
       document.body.style.overflow = '';
     }
     menuBtn.addEventListener('click', openSidebar);
     closeBtn.addEventListener('click', closeSidebar);
     sidebarOverlay.addEventListener('click', closeSidebar);
+
+    /**********************
+     * Custom Global Surah Logic
+     **********************/
+    function populateCustomSurah(filterText = '') {
+      customSurahList.innerHTML = '';
+      const term = filterText.toLowerCase();
+      
+      const filtered = SURAH_META.filter(s => s[1].toLowerCase().includes(term) || s[0].toString().includes(term));
+      
+      if(filtered.length === 0) {
+        customSurahList.innerHTML = '<li class="p-3 text-slate-400 text-center">Surah not found</li>';
+        return;
+      }
+
+      filtered.forEach(s => {
+        const li = document.createElement('li');
+        li.className = "p-3 border-b border-slate-100 dark:border-slate-700 hover:bg-amber-50 dark:hover:bg-slate-700 cursor-pointer flex justify-between";
+        li.innerHTML = `<span class="font-semibold">${s[0]}. ${s[1]}</span> <span class="text-xs text-slate-400">Juz ${s[2]}</span>`;
+        
+        li.addEventListener('click', async () => {
+          customSurahMenu.classList.add('hidden');
+          closeSidebar();
+          
+          const targetJuz = s[2];
+          const targetSurahId = s[0];
+
+          if (currentActiveJuz !== targetJuz) {
+            currentActiveJuz = targetJuz;
+            await fetchAndRenderJuz(targetJuz, false);
+          }
+          // Delay agar render DOM selesai
+          setTimeout(() => scrollToTarget(`surah-${targetSurahId}`), 250);
+        });
+        customSurahList.appendChild(li);
+      });
+    }
+
+    customSurahBtn.addEventListener('click', () => {
+      customSurahMenu.classList.toggle('hidden');
+      if(!customSurahMenu.classList.contains('hidden')){
+         customSurahSearch.focus();
+         populateCustomSurah(); // Load all
+      }
+    });
+
+    customSurahSearch.addEventListener('input', (e) => populateCustomSurah(e.target.value));
+
+    // Menutup dropdown jika klik di luarnya
+    document.addEventListener('click', (e) => {
+      if(!customSurahBtn.contains(e.target) && !customSurahMenu.contains(e.target)){
+        customSurahMenu.classList.add('hidden');
+      }
+    });
 
     /**********************
      * Helpers
@@ -424,10 +537,7 @@
 
     function todayISO() {
       const d = new Date();
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      return `${yyyy}-${mm}-${dd}`;
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
 
     function daysBetweenISO(a, b) {
@@ -439,17 +549,14 @@
     function recordReadingSession() {
       const t = todayISO();
       const last = localStorage.getItem(STORAGE_KEYS.lastReadDate);
-
       let streak = safeNumber(localStorage.getItem(STORAGE_KEYS.streakCount), 0);
 
       if (!last) streak = 1;
-      else if (last === t) { /* no change */ }
-      else {
+      else if (last !== t) {
         const diff = daysBetweenISO(last, t);
         if (diff === 1) streak = Math.max(1, streak + 1);
         else streak = 1;
       }
-
       localStorage.setItem(STORAGE_KEYS.lastReadDate, t);
       localStorage.setItem(STORAGE_KEYS.streakCount, String(streak));
       updateStreakUI();
@@ -467,7 +574,7 @@
 
     function colorizeWaqf(text) {
       text = text.replace(/([\u06D8])/g, '<span class="text-red-600 font-bold">$1</span>');
-      text = text.replace(/([\u06D7\u06DA\u06DB])/g, '<span class="text-rose-300 font-bold text-[1.8rem]">$1</span>');
+      text = text.replace(/([\u06D7\u06DA\u06DB])/g, '<span class="text-pink-500 font-bold text-[1.8rem]">$1</span>'); // REVISI PINK
       text = text.replace(/([\u06D6])/g, '<span class="text-yellow-400 font-bold text-[1.8rem]">$1</span>');
       text = text.replace(/([\u06D9])/g, '<span class="text-emerald-500 font-bold">$1</span>');
       return text;
@@ -492,19 +599,12 @@
       return arName.replace(/^سُورَةُ\s+/u, '').replace(/^سورة\s+/u, '').trim();
     }
 
-    /**********************
-     * iOS install banner logic
-     **********************/
-    function isIOS() {
-      return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    }
-    function isInStandaloneMode() {
-      return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone === true);
-    }
     function maybeShowIOSBanner() {
       const dismissed = localStorage.getItem(STORAGE_KEYS.iosBannerDismissed) === 'true';
       if (dismissed) return;
-      if (isIOS() && !isInStandaloneMode()) iosBanner.classList.add('show');
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone;
+      if (isIOS && !isStandalone) iosBanner.classList.add('show');
     }
     iosBannerClose.addEventListener('click', () => {
       iosBanner.classList.remove('show');
@@ -514,17 +614,15 @@
     /**********************
      * Font size logic
      **********************/
-    function clamp(n, min, max){ return Math.min(max, Math.max(min, n)); }
-
     function applyArabicFontRem(rem) {
-      const v = clamp(rem, 1.6, 3.2);
+      const v = Math.min(3.2, Math.max(1.6, rem));
       document.documentElement.style.setProperty('--arabic-font-size', `${v.toFixed(2)}rem`);
       arabicSizeLabel.innerText = v.toFixed(2);
       localStorage.setItem(STORAGE_KEYS.arabicFontRem, String(v));
     }
 
     function applyTranslationFontRem(rem) {
-      const v = clamp(rem, 0.85, 1.6);
+      const v = Math.min(1.6, Math.max(0.85, rem));
       document.documentElement.style.setProperty('--translation-font-size', `${v.toFixed(2)}rem`);
       translationSizeLabel.innerText = v.toFixed(2);
       localStorage.setItem(STORAGE_KEYS.translationFontRem, String(v));
@@ -542,15 +640,13 @@
      * IndexedDB cache
      **********************/
     const IDB_DB_NAME = 'quran_mobile_miki';
-    const IDB_DB_VERSION = 1;
     const IDB_STORE = 'juz_cache';
 
     function idbOpen() {
       return new Promise((resolve, reject) => {
-        const req = indexedDB.open(IDB_DB_NAME, IDB_DB_VERSION);
+        const req = indexedDB.open(IDB_DB_NAME, 1);
         req.onupgradeneeded = () => {
-          const db = req.result;
-          if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE, { keyPath: 'key' });
+          if (!req.result.objectStoreNames.contains(IDB_STORE)) req.result.createObjectStore(IDB_STORE, { keyPath: 'key' });
         };
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
@@ -560,9 +656,7 @@
     async function idbGet(key) {
       const db = await idbOpen();
       return new Promise((resolve, reject) => {
-        const tx = db.transaction(IDB_STORE, 'readonly');
-        const store = tx.objectStore(IDB_STORE);
-        const req = store.get(key);
+        const req = db.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(key);
         req.onsuccess = () => resolve(req.result || null);
         req.onerror = () => reject(req.error);
       });
@@ -571,9 +665,7 @@
     async function idbSet(key, value) {
       const db = await idbOpen();
       return new Promise((resolve, reject) => {
-        const tx = db.transaction(IDB_STORE, 'readwrite');
-        const store = tx.objectStore(IDB_STORE);
-        const req = store.put({ key, value, savedAt: Date.now() });
+        const req = db.transaction(IDB_STORE, 'readwrite').objectStore(IDB_STORE).put({ key, value, savedAt: Date.now() });
         req.onsuccess = () => resolve(true);
         req.onerror = () => reject(req.error);
       });
@@ -582,8 +674,7 @@
     async function idbClearAll() {
       const db = await idbOpen();
       return new Promise((resolve, reject) => {
-        const tx = db.transaction(IDB_STORE, 'readwrite');
-        const req = tx.objectStore(IDB_STORE).clear();
+        const req = db.transaction(IDB_STORE, 'readwrite').objectStore(IDB_STORE).clear();
         req.onsuccess = () => resolve(true);
         req.onerror = () => reject(req.error);
       });
@@ -607,11 +698,9 @@
       btn.classList.toggle('bg-navy', isActive);
       btn.classList.toggle('border-navy', isActive);
       btn.classList.toggle('text-white', isActive);
-
       btn.classList.toggle('bg-white', !isActive);
       btn.classList.toggle('border-slate-300', !isActive);
       btn.classList.toggle('text-slate-600', !isActive);
-
       document.getElementById(labelId).innerText = labelText;
     }
 
@@ -629,39 +718,26 @@
       localStorage.setItem(STORAGE_KEYS.darkPref, String(isDark));
     }
 
-    function toggleDarkMode() {
-      const isDark = document.documentElement.classList.contains('dark');
-      setDarkMode(!isDark);
-    }
-
     /**********************
      * Progress calc
      **********************/
     function calculateProgress() {
       const savedAbsAyah = safeNumber(localStorage.getItem(STORAGE_KEYS.khatamAyah), 0);
-
-      const totalPercent = ((savedAbsAyah / TOTAL_AYAH_QURAN) * 100);
-      progTotalEl.innerText = `${totalPercent.toFixed(1)}%`;
+      progTotalEl.innerText = `${((savedAbsAyah / TOTAL_AYAH_QURAN) * 100).toFixed(1)}%`;
 
       if (currentJuzData.length > 0) {
         const minAyahJuz = currentJuzData[0].number;
         const maxAyahJuz = currentJuzData[currentJuzData.length - 1].number;
-        const totalAyahInJuz = currentJuzData.length;
-
+        
         let juzPercent = 0;
         if (savedAbsAyah >= maxAyahJuz) juzPercent = 100;
-        else if (savedAbsAyah < minAyahJuz) juzPercent = 0;
-        else juzPercent = ((savedAbsAyah - minAyahJuz + 1) / totalAyahInJuz) * 100;
-
+        else if (savedAbsAyah > minAyahJuz) juzPercent = ((savedAbsAyah - minAyahJuz + 1) / currentJuzData.length) * 100;
         progJuzEl.innerText = `${juzPercent.toFixed(1)}%`;
-      } else {
-        progJuzEl.innerText = `0%`;
       }
 
-      document.querySelectorAll('.ayah-marker').forEach(marker => {
-        const absNum = safeNumber(marker.getAttribute('data-abs-num'), -1);
-        if (absNum === savedAbsAyah) marker.classList.add('marked');
-        else marker.classList.remove('marked');
+      document.querySelectorAll('.ayah-marker').forEach(m => {
+        if (safeNumber(m.getAttribute('data-abs-num'), -1) === savedAbsAyah) m.classList.add('marked');
+        else m.classList.remove('marked');
       });
     }
 
@@ -675,412 +751,243 @@
     /**********************
      * Precise resume (scrollY)
      **********************/
-    function throttle(fn, waitMs) {
-      let last = 0;
-      let timeout = null;
-      return function(...args) {
-        const now = Date.now();
-        const remaining = waitMs - (now - last);
-        if (remaining <= 0) {
-          last = now; fn.apply(this, args);
-        } else if (!timeout) {
-          timeout = setTimeout(() => {
-            timeout = null; last = Date.now(); fn.apply(this, args);
-          }, remaining);
-        }
+    let lastScroll = 0;
+    let scrollTimeout = null;
+    window.addEventListener('scroll', () => {
+      const now = Date.now();
+      if(now - lastScroll > 800) {
+         lastScroll = now;
+         localStorage.setItem(STORAGE_KEYS.scrollY, String(window.scrollY));
+         localStorage.setItem(STORAGE_KEYS.scrollJuz, String(currentActiveJuz));
+         localStorage.setItem(STORAGE_KEYS.lastSeenAt, String(now));
       }
-    }
-
-    const saveScrollPositionThrottled = throttle(() => {
-      localStorage.setItem(STORAGE_KEYS.scrollY, String(window.scrollY));
-      localStorage.setItem(STORAGE_KEYS.scrollJuz, String(currentActiveJuz));
-      localStorage.setItem(STORAGE_KEYS.lastSeenAt, String(Date.now()));
-    }, 800);
-
-    window.addEventListener('scroll', saveScrollPositionThrottled, { passive: true });
+    }, { passive: true });
 
     function resumeToLastPosition() {
-      const savedJuz = safeNumber(localStorage.getItem(STORAGE_KEYS.lastReadJuz), 0);
-      const savedScrollJuz = safeNumber(localStorage.getItem(STORAGE_KEYS.scrollJuz), 0);
-      const savedScrollY = safeNumber(localStorage.getItem(STORAGE_KEYS.scrollY), -1);
-      const savedPageID = localStorage.getItem(STORAGE_KEYS.lastReadPageID);
+      const sY = safeNumber(localStorage.getItem(STORAGE_KEYS.scrollY), -1);
+      const sJuz = safeNumber(localStorage.getItem(STORAGE_KEYS.scrollJuz), 0);
+      const sPage = localStorage.getItem(STORAGE_KEYS.lastReadPageID);
 
-      if (savedScrollY >= 0 && savedJuz === currentActiveJuz && savedScrollJuz === currentActiveJuz) {
-        window.scrollTo({ top: savedScrollY, behavior: 'smooth' });
-        showToast('Resumed last position ✅');
-        return;
+      if (sY >= 0 && sJuz === currentActiveJuz) {
+        window.scrollTo({ top: sY, behavior: 'smooth' });
+      } else if (sPage && document.getElementById(sPage)) {
+        scrollToTarget(sPage);
+      } else {
+        showToast('No saved position yet 🙂');
       }
-
-      if (savedPageID && document.getElementById(savedPageID)) {
-        scrollToTarget(savedPageID);
-        showToast('Resumed last page ✅');
-        return;
-      }
-
-      showToast('No saved position yet 🙂');
     }
 
     continueBtn.addEventListener('click', resumeToLastPosition);
     continueBtnMobile.addEventListener('click', () => {
-      closeSidebar();
-      setTimeout(resumeToLastPosition, 150);
+      closeSidebar(); setTimeout(resumeToLastPosition, 150);
     });
 
     /**********************
-     * Fetch & render (offline-first)
+     * Fetch & render
      **********************/
-    function getSelectedTranslationEdition() {
-      const saved = localStorage.getItem(STORAGE_KEYS.translationEdition);
-      if (saved) return saved;
-      return EDITIONS.ID;
-    }
-
-    function setSelectedTranslationEdition(edition) {
-      localStorage.setItem(STORAGE_KEYS.translationEdition, edition);
-      translationLangSelect.value = edition;
-    }
-
-    async function fetchJuzFromNetwork(juzNumber, translationEdition) {
-      const [resArabic, resTrans] = await Promise.all([
-        fetch(`https://api.alquran.cloud/v1/juz/${juzNumber}/${EDITIONS.ARABIC}`, { cache: 'no-store' }),
-        fetch(`https://api.alquran.cloud/v1/juz/${juzNumber}/${translationEdition}`, { cache: 'no-store' }),
-      ]);
-
-      if (!resArabic.ok || !resTrans.ok) {
-        throw new Error(`Network fetch failed. Arabic=${resArabic.status}, Trans=${resTrans.status}`);
-      }
-
-      const dataArabic = await resArabic.json();
-      const dataTrans = await resTrans.json();
-      return { dataArabic, dataTrans };
-    }
-
-    async function getJuzData(juzNumber, translationEdition) {
-      const cacheKey = `juz-${juzNumber}__trans-${translationEdition}`;
-
+    async function getJuzData(juzNumber, edition) {
+      const cacheKey = `juz-${juzNumber}__trans-${edition}`;
       try {
         const cached = await idbGet(cacheKey);
-        if (cached?.value?.dataArabic && cached?.value?.dataTrans) {
-          return { ...cached.value, source: 'cache' };
-        }
-      } catch (e) {
-        console.warn('IDB read failed', e);
-      }
+        if (cached?.value?.dataArabic) return { ...cached.value, source: 'cache' };
+      } catch (e) {}
 
-      const fresh = await fetchJuzFromNetwork(juzNumber, translationEdition);
-      try { await idbSet(cacheKey, fresh); } catch (e) { console.warn('IDB write failed', e); }
-      return { ...fresh, source: 'network' };
-    }
-
-    function initJuzDropdown() {
-      let html = '';
-      for (let i = 1; i <= 30; i++) html += `<option value="${i}">Juz ${i}</option>`;
-      juzSelect.innerHTML = html;
+      const [resAr, resTr] = await Promise.all([
+        fetch(`https://api.alquran.cloud/v1/juz/${juzNumber}/${EDITIONS.ARABIC}`, { cache: 'no-store' }),
+        fetch(`https://api.alquran.cloud/v1/juz/${juzNumber}/${edition}`, { cache: 'no-store' }),
+      ]);
+      const data = { dataArabic: await resAr.json(), dataTrans: await resTr.json() };
+      try { await idbSet(cacheKey, data); } catch (e) {}
+      return { ...data, source: 'network' };
     }
 
     async function fetchAndRenderJuz(juzNumber, isInitialLoad = false) {
-      const translationEdition = getSelectedTranslationEdition();
-
+      const edition = localStorage.getItem(STORAGE_KEYS.translationEdition) || EDITIONS.ID;
       setLoadingState(true, 'Preparing (offline-first)...');
       container.innerHTML = '';
-
-      surahSelect.innerHTML = '<option value="">-- Waiting for Data --</option>';
-      pageSelect.innerHTML = '<option value="">-- Waiting for Data --</option>';
-      surahSelect.disabled = true;
-      pageSelect.disabled = true;
+      pageSelect.innerHTML = '<option value="">-- Waiting --</option>';
 
       try {
-        const { dataArabic, dataTrans, source } = await getJuzData(juzNumber, translationEdition);
+        const { dataArabic, dataTrans, source } = await getJuzData(juzNumber, edition);
         if (source === 'cache') showToast('Loaded from cache ✅');
 
         const ayahsArabic = dataArabic.data.ayahs;
         const ayahsTrans = dataTrans.data.ayahs || [];
         currentJuzData = ayahsArabic;
 
-        let currentPageNumber = null;
-        let currentSurahNumber = null;
-        let htmlContent = '';
-
+        let curPage = null, curSurah = null, html = '';
         const uniquePages = [];
-        const pageSet = new Set();
 
-        const uniqueSurahs = [];
-        const surahMap = new Map();
+        for (let i = 0; i < ayahsArabic.length; i++) {
+          const ayah = ayahsArabic[i];
+          
+          if (!uniquePages.includes(ayah.page)) uniquePages.push(ayah.page);
 
-        for (let index = 0; index < ayahsArabic.length; index++) {
-          const ayah = ayahsArabic[index];
-
-          if (!pageSet.has(ayah.page)) { pageSet.add(ayah.page); uniquePages.push(ayah.page); }
-
-          if (!surahMap.has(ayah.surah.number)) {
-            surahMap.set(ayah.surah.number, true);
-            uniqueSurahs.push({
-              number: ayah.surah.number,
-              englishName: ayah.surah.englishName,
-              arabicName: normalizeSurahArabicName(ayah.surah.name)
-            });
-          }
-
-          if (ayah.page !== currentPageNumber) {
-            if (currentPageNumber !== null) htmlContent += `</div></div>`;
-            htmlContent += `
-              <div class="quran-page-card bg-kertas mb-8 rounded-xl shadow-md border border-slate-300 overflow-hidden dark:border-slate-800 dark:bg-slate-900/70"
-                   id="page-${ayah.page}">
+          if (ayah.page !== curPage) {
+            if (curPage !== null) html += `</div></div>`;
+            html += `
+              <div class="quran-page-card bg-kertas mb-8 rounded-xl shadow-md border border-slate-300 overflow-hidden dark:border-slate-800 dark:bg-slate-900/70" id="page-${ayah.page}">
                 <div class="bg-slate-100 text-slate-600 text-center font-bold py-2 border-b border-slate-300 text-sm tracking-wide flex justify-between px-4 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800">
-                  <span>Juz ${juzNumber}</span>
-                  <span>Page ${ayah.page}</span>
+                  <span>Juz ${juzNumber}</span><span>Page ${ayah.page}</span>
                 </div>
                 <div class="p-5 font-quran quran-text text-navy dark:text-slate-100">`;
-            currentPageNumber = ayah.page;
+            curPage = ayah.page;
           }
 
-          if (ayah.surah.number !== currentSurahNumber) {
-            const surahName = normalizeSurahArabicName(ayah.surah.name);
-            htmlContent += `
-              <div id="surah-${ayah.surah.number}"
-                   class="surah-header-block text-2xl text-amber-600 border-y-2 border-amber-200 py-3 mx-0 my-5 bg-amber-50/30 dark:bg-amber-500/10 dark:border-amber-500/20">
-                سورة ${surahName}
-              </div>`;
-
+          if (ayah.surah.number !== curSurah) {
+            html += `<div id="surah-${ayah.surah.number}" class="surah-header-block text-2xl text-amber-600 border-y-2 border-amber-200 py-3 mx-0 my-5 bg-amber-50/30 dark:bg-amber-500/10 dark:border-amber-500/20">سورة ${normalizeSurahArabicName(ayah.surah.name)}</div>`;
             if (ayah.surah.number !== 1 && ayah.surah.number !== 9) {
-              htmlContent += `<span class="bismillah-block text-3xl mb-5 text-slate-800 dark:text-slate-100">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</span>`;
+              html += `<span class="bismillah-block text-3xl mb-5 text-slate-800 dark:text-slate-100">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</span>`;
             }
-            currentSurahNumber = ayah.surah.number;
+            curSurah = ayah.surah.number;
           }
 
           let textAr = colorizeWaqf(ayah.text);
-          const textTr = ayahsTrans[index]?.text ?? '';
+          if (ayah.numberInSurah === 1 && ayah.surah.number !== 1) textAr = textAr.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ', '');
 
-          if (ayah.numberInSurah === 1 && ayah.surah.number !== 1) {
-            textAr = textAr.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ', '');
-          }
-
-          htmlContent += `
+          html += `
             <span class="ayah-container" id="ayah-${ayah.number}">
               <span class="inline">${textAr}
-                <span class="ayah-marker text-2xl text-slate-400 mx-1 dark:text-slate-500"
-                      data-abs-num="${ayah.number}"
-                      onclick="markProgress(${ayah.number})">۝${toArabicNumber(ayah.numberInSurah)}</span>
+                <span class="ayah-marker text-2xl text-slate-400 mx-1 dark:text-slate-500" data-abs-num="${ayah.number}" onclick="markProgress(${ayah.number})">۝${toArabicNumber(ayah.numberInSurah)}</span>
               </span>
-              <div class="translation-text">"${textTr}"</div>
+              <div class="translation-text">"${ayahsTrans[i]?.text ?? ''}"</div>
             </span>`;
         }
-
-        htmlContent += `</div></div>`;
-        container.innerHTML = htmlContent;
-
-        // dropdowns
-        surahSelect.innerHTML = '<option value="">-- Select Surah --</option>';
-        for (const s of uniqueSurahs) {
-          const label = `${s.number}. ${s.englishName} (${s.arabicName || '—'})`;
-          surahSelect.innerHTML += `<option value="surah-${s.number}">${label}</option>`;
-        }
-
-        pageSelect.innerHTML = '<option value="">-- Select Page --</option>';
-        for (const page of uniquePages) pageSelect.innerHTML += `<option value="page-${page}">Page ${page}</option>`;
-
-        surahSelect.disabled = false;
+        
+        container.innerHTML = html + `</div></div>`;
+        
+        pageSelect.innerHTML = '<option value="">-- Page --</option>';
+        uniquePages.forEach(p => pageSelect.innerHTML += `<option value="page-${p}">Page ${p}</option>`);
         pageSelect.disabled = false;
+        
         juzSelect.value = String(juzNumber);
-
+        
         calculateProgress();
         updateStreakUI();
 
-        // page observer
         if (pageObserver) pageObserver.disconnect();
         pageObserver = new IntersectionObserver((entries) => {
-          for (const entry of entries) {
-            if (!entry.isIntersecting) continue;
-
-            localStorage.setItem(STORAGE_KEYS.lastReadJuz, String(juzNumber));
-            localStorage.setItem(STORAGE_KEYS.lastReadPageID, entry.target.id);
-            pageSelect.value = entry.target.id;
-
-            recordReadingSession();
-          }
-        }, { root: null, rootMargin: '0px', threshold: 0.3 });
-
-        document.querySelectorAll('.quran-page-card').forEach(card => pageObserver.observe(card));
+          entries.forEach(e => {
+            if(e.isIntersecting) {
+              localStorage.setItem(STORAGE_KEYS.lastReadJuz, String(juzNumber));
+              localStorage.setItem(STORAGE_KEYS.lastReadPageID, e.target.id);
+              pageSelect.value = e.target.id;
+              recordReadingSession();
+            }
+          });
+        }, { threshold: 0.3 });
+        document.querySelectorAll('.quran-page-card').forEach(c => pageObserver.observe(c));
 
         setLoadingState(false);
 
-        // Continue button visibility
-        const savedScrollY = safeNumber(localStorage.getItem(STORAGE_KEYS.scrollY), -1);
-        const savedPageID = localStorage.getItem(STORAGE_KEYS.lastReadPageID);
-        const canContinue = (savedScrollY >= 0) || Boolean(savedPageID);
+        const canContinue = safeNumber(localStorage.getItem(STORAGE_KEYS.scrollY), -1) >= 0 || localStorage.getItem(STORAGE_KEYS.lastReadPageID);
         continueBtn.classList.toggle('hidden', !canContinue);
 
         if (isInitialLoad) {
-          const savedJuz = safeNumber(localStorage.getItem(STORAGE_KEYS.lastReadJuz), 0);
-          const savedScrollJuz = safeNumber(localStorage.getItem(STORAGE_KEYS.scrollJuz), 0);
-          const savedScrollY2 = safeNumber(localStorage.getItem(STORAGE_KEYS.scrollY), -1);
-          const savedPageID2 = localStorage.getItem(STORAGE_KEYS.lastReadPageID);
-
           setTimeout(() => {
-            if (savedScrollY2 >= 0 && savedJuz === juzNumber && savedScrollJuz === juzNumber) {
-              window.scrollTo({ top: savedScrollY2, behavior: 'auto' });
-              pageSelect.value = savedPageID2 || pageSelect.value;
-            } else if (savedPageID2 && document.getElementById(savedPageID2)) {
-              scrollToTarget(savedPageID2);
-              pageSelect.value = savedPageID2;
-            }
+            const sY = safeNumber(localStorage.getItem(STORAGE_KEYS.scrollY), -1);
+            if (sY >= 0 && safeNumber(localStorage.getItem(STORAGE_KEYS.scrollJuz), 0) === juzNumber) window.scrollTo({ top: sY });
           }, 250);
         } else {
           window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
       } catch (error) {
-        console.error(error);
-        setLoadingState(true, 'Failed to load. Check your internet (or cache is not available yet for this Juz + translation).');
-        showToast('Failed to load 😕');
+        setLoadingState(true, 'Failed to load. Check connection.');
       }
     }
 
     /**********************
-     * Offline download actions
+     * Offline Download
      **********************/
-    function showOfflineProgress(show) {
-      offlineProgressBox.classList.toggle('hidden', !show);
-    }
-
-    function setOfflineProgress(label, pct) {
-      offlineProgressText.innerText = label;
-      offlineProgressPct.innerText = `${pct}%`;
-      offlineProgressBar.style.width = `${pct}%`;
-    }
-
-    async function downloadOfflineForJuz(juzNumber) {
-      const translationEdition = getSelectedTranslationEdition();
-      showOfflineProgress(true);
-      setOfflineProgress(`Saving Juz ${juzNumber}...`, 10);
-
+    async function dlOffline(j) {
+      const ed = localStorage.getItem(STORAGE_KEYS.translationEdition) || EDITIONS.ID;
+      offlineProgressBox.classList.remove('hidden');
+      offlineProgressText.innerText = `Saving Juz ${j}...`;
+      
       try {
-        const fresh = await fetchJuzFromNetwork(juzNumber, translationEdition);
-        await idbSet(`juz-${juzNumber}__trans-${translationEdition}`, fresh);
-        setOfflineProgress(`Saved Juz ${juzNumber} ✅`, 100);
-        showToast(`Offline ready: Juz ${juzNumber}`);
-      } catch (e) {
-        console.warn(e);
-        showToast('Failed to save offline 😕');
-        setOfflineProgress(`Failed saving Juz ${juzNumber}`, 0);
-      } finally {
-        setTimeout(() => showOfflineProgress(false), 1200);
-      }
+        const [ar, tr] = await Promise.all([
+          fetch(`https://api.alquran.cloud/v1/juz/${j}/${EDITIONS.ARABIC}`),
+          fetch(`https://api.alquran.cloud/v1/juz/${j}/${ed}`)
+        ]);
+        await idbSet(`juz-${j}__trans-${ed}`, { dataArabic: await ar.json(), dataTrans: await tr.json() });
+        offlineProgressPct.innerText = '100%'; offlineProgressBar.style.width = '100%';
+        showToast(`Offline ready: Juz ${j}`);
+      } catch (e) { showToast('Failed to save offline'); }
+      setTimeout(() => offlineProgressBox.classList.add('hidden'), 1500);
     }
-
-    async function downloadOfflineAllJuz() {
-      const translationEdition = getSelectedTranslationEdition();
-      showOfflineProgress(true);
-      setOfflineProgress('Downloading Juz 1–30...', 0);
-
+    offlineCurrentBtn.addEventListener('click', () => dlOffline(currentActiveJuz));
+    
+    offlineAllBtn.addEventListener('click', async () => {
+      const ed = localStorage.getItem(STORAGE_KEYS.translationEdition) || EDITIONS.ID;
+      offlineProgressBox.classList.remove('hidden');
       let ok = 0;
       for (let j = 1; j <= 30; j++) {
-        const pct = Math.round(((j - 1) / 30) * 100);
-        setOfflineProgress(`Downloading Juz ${j}/30...`, pct);
-
+        const pct = Math.round((j / 30) * 100);
+        offlineProgressText.innerText = `Juz ${j}/30...`;
+        offlineProgressPct.innerText = `${pct}%`; offlineProgressBar.style.width = `${pct}%`;
         try {
-          const fresh = await fetchJuzFromNetwork(j, translationEdition);
-          await idbSet(`juz-${j}__trans-${translationEdition}`, fresh);
+          const [ar, tr] = await Promise.all([fetch(`https://api.alquran.cloud/v1/juz/${j}/${EDITIONS.ARABIC}`), fetch(`https://api.alquran.cloud/v1/juz/${j}/${ed}`)]);
+          await idbSet(`juz-${j}__trans-${ed}`, { dataArabic: await ar.json(), dataTrans: await tr.json() });
           ok++;
-        } catch (e) {
-          console.warn(`Failed juz ${j}`, e);
-        }
+        } catch (e) {}
       }
+      showToast(`Saved ${ok}/30 Juz`);
+      setTimeout(() => offlineProgressBox.classList.add('hidden'), 1500);
+    });
 
-      setOfflineProgress(`Done ✅ (${ok}/30 saved)`, 100);
-      showToast(`Offline done: ${ok}/30 Juz`);
-      setTimeout(() => showOfflineProgress(false), 1800);
-    }
-
-    offlineCurrentBtn.addEventListener('click', () => downloadOfflineForJuz(currentActiveJuz));
-    offlineAllBtn.addEventListener('click', downloadOfflineAllJuz);
-
-    /**********************
-     * Reset
-     **********************/
     resetBtn.addEventListener('click', async () => {
-      if (!confirm('⚠️ WARNING\nDelete all progress, last position, settings, and offline cache?')) return;
+      if (!confirm('⚠️ Delete all progress & offline cache?')) return;
       localStorage.clear();
-      try { await idbClearAll(); } catch (e) { console.warn('IDB clear failed', e); }
+      await idbClearAll();
       window.location.reload();
     });
 
     /**********************
-     * Events: dropdowns & toggles
+     * Inits & Listeners
      **********************/
     toggleTransBtn.addEventListener('click', toggleTranslation);
-    toggleDarkBtn.addEventListener('click', toggleDarkMode);
-
+    toggleDarkBtn.addEventListener('click', () => setDarkMode(!document.documentElement.classList.contains('dark')));
+    
     translationLangSelect.addEventListener('change', async (e) => {
-      const edition = e.target.value;
-      setSelectedTranslationEdition(edition);
-      showToast('Switching translation...');
+      localStorage.setItem(STORAGE_KEYS.translationEdition, e.target.value);
       await fetchAndRenderJuz(currentActiveJuz, false);
       closeSidebar();
     });
 
     juzSelect.addEventListener('change', async (e) => {
-      const nextJuz = safeNumber(e.target.value, currentActiveJuz);
-      if (nextJuz !== currentActiveJuz) {
-        currentActiveJuz = nextJuz;
+      if (Number(e.target.value) !== currentActiveJuz) {
+        currentActiveJuz = Number(e.target.value);
         await fetchAndRenderJuz(currentActiveJuz, false);
         closeSidebar();
       }
     });
 
-    surahSelect.addEventListener('change', (e) => {
-      if (e.target.value) {
-        scrollToTarget(e.target.value);
-        pageSelect.selectedIndex = 0;
-        closeSidebar();
-      }
-    });
-
     pageSelect.addEventListener('change', (e) => {
-      if (e.target.value) {
-        scrollToTarget(e.target.value);
-        surahSelect.selectedIndex = 0;
-        closeSidebar();
-      }
+      if (e.target.value) { scrollToTarget(e.target.value); closeSidebar(); }
     });
 
-    /**********************
-     * Init
-     **********************/
     function initApp() {
-      initJuzDropdown();
+      for (let i = 1; i <= 30; i++) juzSelect.innerHTML += `<option value="${i}">Juz ${i}</option>`;
 
-      // Restore font sizes
-      const savedArabicRem = safeNumber(localStorage.getItem(STORAGE_KEYS.arabicFontRem), 2.2);
-      arabicSizeSlider.value = String(savedArabicRem);
-      applyArabicFontRem(savedArabicRem);
+      applyArabicFontRem(safeNumber(localStorage.getItem(STORAGE_KEYS.arabicFontRem), 2.2));
+      applyTranslationFontRem(safeNumber(localStorage.getItem(STORAGE_KEYS.translationFontRem), 1.0));
+      arabicSizeSlider.value = localStorage.getItem(STORAGE_KEYS.arabicFontRem) || 2.2;
+      translationSizeSlider.value = localStorage.getItem(STORAGE_KEYS.translationFontRem) || 1.0;
 
-      const savedTranslationRem = safeNumber(localStorage.getItem(STORAGE_KEYS.translationFontRem), 1.0);
-      translationSizeSlider.value = String(savedTranslationRem);
-      applyTranslationFontRem(savedTranslationRem);
-
-      // prefs
       if (localStorage.getItem(STORAGE_KEYS.transPref) === 'true') {
         document.body.classList.add('show-translation');
         updateToggleUI(toggleTransBtn, 'label-trans', true, 'Translation: ON');
       }
       updateTranslationSliderVisibility();
+      setDarkMode(localStorage.getItem(STORAGE_KEYS.darkPref) === 'true');
+      translationLangSelect.value = localStorage.getItem(STORAGE_KEYS.translationEdition) || EDITIONS.ID;
 
-      const darkPref = localStorage.getItem(STORAGE_KEYS.darkPref) === 'true';
-      setDarkMode(darkPref);
-
-      // translation edition
-      const savedEdition = (localStorage.getItem(STORAGE_KEYS.translationEdition) || EDITIONS.ID);
-      setSelectedTranslationEdition(savedEdition);
-
-      // restore juz
       const savedJuz = safeNumber(localStorage.getItem(STORAGE_KEYS.lastReadJuz), 1);
       currentActiveJuz = (savedJuz >= 1 && savedJuz <= 30) ? savedJuz : 1;
 
       updateStreakUI();
       maybeShowIOSBanner();
-
-      // load
       fetchAndRenderJuz(currentActiveJuz, true);
     }
 
