@@ -40,7 +40,7 @@
       --translation-line-height: 1.55;
     }
 
-    /* Arabic reading area */
+    /* Default reading mode */
     .quran-text {
       text-align: justify;
       text-align-last: center;
@@ -49,7 +49,6 @@
       font-size: var(--arabic-font-size);
       line-height: var(--arabic-line-height);
     }
-
     .ayah-container { display: inline; }
     .translation-text { display: none; }
 
@@ -71,13 +70,6 @@
       margin-top: 1rem;
     }
 
-    /* ✅ Dark mode translation readability fix */
-    .dark body.show-translation .translation-text,
-    .dark .translation-text {
-      color: #e2e8f0; /* slate-200 */
-      opacity: 0.95;
-    }
-
     .surah-header-block, .bismillah-block {
       display: block !important; width: 100%;
       text-align: center !important; text-align-last: center !important;
@@ -95,50 +87,9 @@
     #toast { visibility: hidden; opacity: 0; transition: opacity 0.5s, visibility 0.5s; }
     #toast.show { visibility: visible; opacity: 1; }
 
-    /* iOS install banner */
+    /* small top banner for iOS install help */
     #ios-install-banner { display: none; }
     #ios-install-banner.show { display: block; }
-
-    /* ✅ Tajweed markup styling (AlQuran Cloud quran-tajweed) */
-    /* The API uses <tajweed class="ham_wasl" ...>X</tajweed> etc. */
-    tajweed { font-weight: inherit; }
-    tajweed.ham_wasl, tajweed.slnt, tajweed.lam_shamsiyyah { color: #9ca3af; }         /* gray */
-    tajweed.madda_normal { color: #537FFF; }
-    tajweed.madda_permissible { color: #4050FF; }
-    tajweed.madda_necessary { color: #000EBC; }
-    tajweed.qlq { color: #DD0008; }                                                   /* qalaqah red */
-    tajweed.madda_obligatory { color: #2144C1; }
-    tajweed.ikhf_shfw { color: #D500B7; }
-    tajweed.ikhf { color: #9400A8; }
-    tajweed.idghm_shfw { color: #58B800; }
-    tajweed.iqlb { color: #26BFFD; }
-    tajweed.idgh_ghn { color: #169777; }
-    tajweed.idgh_w_ghn { color: #169200; }
-    tajweed.idgh_mus { color: #A1A1A1; }
-    tajweed.ghn { color: #FF7E1E; }                                                   /* ghunnah orange */
-
-    /* In dark mode, slightly brighten tajweed colors */
-    .dark tajweed { filter: saturate(1.1) brightness(1.05); }
-
-    /* Navigation mode */
-    .seg-btn {
-      border: 1px solid rgba(148,163,184,0.6);
-      border-radius: 9999px;
-      padding: 0.4rem 0.75rem;
-      font-weight: 700;
-      font-size: 0.75rem;
-      transition: 0.15s ease;
-    }
-    .seg-btn.active {
-      background: #0f172a;
-      color: #fff;
-      border-color: #0f172a;
-    }
-    .dark .seg-btn.active {
-      background: rgba(245,158,11,0.9);
-      color: #0f172a;
-      border-color: rgba(245,158,11,0.9);
-    }
   </style>
 </head>
 
@@ -163,6 +114,7 @@
         <div class="font-bold text-lg hidden sm:block text-amber-500">📖 Qur'an Mobile</div>
         <div class="font-bold text-lg sm:hidden text-amber-500">📖 Qur'an</div>
 
+        <!-- Continue + streak -->
         <button id="continue-btn"
           class="ml-2 hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-600/60 text-xs font-semibold text-slate-200 hover:bg-white/10 transition"
           title="Continue from last position">
@@ -202,38 +154,7 @@
 
     <div class="p-5 flex flex-col gap-5 overflow-y-auto h-full">
 
-      <!-- ✅ Navigation moved to top -->
-      <div class="flex flex-col gap-2">
-        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Navigation</label>
-
-        <!-- Mode toggle -->
-        <div class="flex items-center gap-2">
-          <button id="nav-mode-dropdown" class="seg-btn active" type="button">Dropdown</button>
-          <button id="nav-mode-type" class="seg-btn" type="button">Type</button>
-        </div>
-
-        <!-- Search box (filters dropdowns + works as type mode input) -->
-        <input id="nav-search"
-               class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none font-medium text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700"
-               placeholder="Type to filter (Surah/Page/Juz)..."
-               type="text" />
-
-        <!-- Dropdowns -->
-        <select id="juz-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700"></select>
-
-        <select id="surah-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium disabled:bg-slate-100 disabled:text-slate-400 text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
-          <option value="">-- Waiting for Data --</option>
-        </select>
-
-        <select id="page-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium disabled:bg-slate-100 disabled:text-slate-400 text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
-          <option value="">-- Waiting for Data --</option>
-        </select>
-
-        <div id="nav-type-hint" class="hidden text-[11px] text-slate-500 dark:text-slate-400">
-          Type examples: <b>“2”</b> (Juz 2), <b>“baqarah”</b>, <b>“page 5”</b>.
-        </div>
-      </div>
-
+      <!-- Continue on mobile -->
       <button id="continue-btn-mobile"
         class="w-full px-4 py-3 rounded-lg font-bold border-2 border-slate-300 bg-white text-slate-700 transition-colors flex justify-center items-center gap-2 shadow-sm hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-700">
         ▶ Continue Reading
@@ -247,17 +168,6 @@
         </button>
       </div>
 
-      <!-- ✅ Tajweed toggle -->
-      <div class="flex flex-col gap-2">
-        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Arabic Styling</label>
-        <button id="toggle-tajweed" class="w-full px-4 py-3 rounded-lg font-bold border-2 border-slate-300 bg-white text-slate-600 transition-colors flex justify-start items-center gap-3 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
-          <span class="text-xl">🎨</span> <span id="label-tajweed">Tajweed: ON</span>
-        </button>
-        <div class="text-[11px] text-slate-500 dark:text-slate-400">
-          Tajweed coloring uses AlQuran Cloud <b>quran-tajweed</b> edition.
-        </div>
-      </div>
-
       <!-- Translation language -->
       <div class="flex flex-col gap-2">
         <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Translation Language</label>
@@ -266,7 +176,7 @@
           <option value="en.sahih">🇬🇧 English (Sahih Intl.)</option>
         </select>
         <div class="text-[11px] text-slate-500 dark:text-slate-400">
-          Changing language reloads the current Juz for that translation.
+          Changing language will reload the current Juz for that translation.
         </div>
       </div>
 
@@ -274,6 +184,7 @@
       <div class="flex flex-col gap-3">
         <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Font Size</label>
 
+        <!-- Arabic slider -->
         <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:bg-slate-800 dark:border-slate-700">
           <div class="flex justify-between items-center mb-2">
             <div class="font-semibold text-sm text-slate-700 dark:text-slate-100">Arabic</div>
@@ -284,6 +195,7 @@
           <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-2">Affects Arabic text only.</div>
         </div>
 
+        <!-- Translation slider (only visible when translation ON) -->
         <div id="translation-size-box" class="hidden rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:bg-slate-800 dark:border-slate-700">
           <div class="flex justify-between items-center mb-2">
             <div class="font-semibold text-sm text-slate-700 dark:text-slate-100">Translation</div>
@@ -332,6 +244,21 @@
         <div class="text-[11px] text-slate-500 dark:text-slate-400">
           Tip: Download on Wi-Fi first, then read without internet.
         </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="flex flex-col gap-2">
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Quick Navigation</label>
+
+        <select id="juz-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700"></select>
+
+        <select id="surah-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium disabled:bg-slate-100 disabled:text-slate-400 text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
+          <option value="">-- Waiting for Data --</option>
+        </select>
+
+        <select id="page-select" class="w-full p-2.5 rounded-lg bg-white border border-slate-300 focus:border-amber-500 outline-none cursor-pointer font-medium disabled:bg-slate-100 disabled:text-slate-400 text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
+          <option value="">-- Waiting for Data --</option>
+        </select>
       </div>
 
       <div class="mt-auto pt-4 pb-2">
@@ -391,8 +318,6 @@
     const toggleDarkBtn = document.getElementById('toggle-dark');
     const translationLangSelect = document.getElementById('translation-lang');
 
-    const toggleTajweedBtn = document.getElementById('toggle-tajweed');
-
     const resetBtn = document.getElementById('reset-btn');
     const offlineCurrentBtn = document.getElementById('offline-current');
     const offlineAllBtn = document.getElementById('offline-all');
@@ -426,19 +351,12 @@
     const translationSizeSlider = document.getElementById('translation-size-slider');
     const translationSizeLabel = document.getElementById('translation-size-label');
 
-    // Navigation mode + search
-    const navModeDropdownBtn = document.getElementById('nav-mode-dropdown');
-    const navModeTypeBtn = document.getElementById('nav-mode-type');
-    const navSearch = document.getElementById('nav-search');
-    const navTypeHint = document.getElementById('nav-type-hint');
-
     /**********************
      * State
      **********************/
     let currentActiveJuz = 1;
     let currentJuzData = [];
     let pageObserver = null;
-
     const TOTAL_AYAH_QURAN = 6236;
 
     const STORAGE_KEYS = {
@@ -454,7 +372,7 @@
 
       // streak
       streakCount: 'streakCount',
-      lastReadDate: 'lastReadDate',
+      lastReadDate: 'lastReadDate', // YYYY-MM-DD
 
       // iOS banner dismissed
       iosBannerDismissed: 'iosBannerDismissed',
@@ -462,17 +380,10 @@
       // font sizes
       arabicFontRem: 'arabicFontRem',
       translationFontRem: 'translationFontRem',
-
-      // tajweed
-      tajweedEnabled: 'tajweedEnabled',
-
-      // nav mode
-      navMode: 'navMode', // 'dropdown' | 'type'
     };
 
     const EDITIONS = {
-      ARABIC_TAJWEED: 'quran-tajweed',
-      // NOTE: Tajweed OFF still uses tajweed edition, we just strip markup in render.
+      ARABIC: 'quran-uthmani',
       ID: 'id.indonesian',
       EN: 'en.sahih',
     };
@@ -554,6 +465,14 @@
       }
     }
 
+    function colorizeWaqf(text) {
+      text = text.replace(/([\u06D8])/g, '<span class="text-red-600 font-bold">$1</span>');
+      text = text.replace(/([\u06D7\u06DA\u06DB])/g, '<span class="text-rose-300 font-bold text-[1.8rem]">$1</span>');
+      text = text.replace(/([\u06D6])/g, '<span class="text-yellow-400 font-bold text-[1.8rem]">$1</span>');
+      text = text.replace(/([\u06D9])/g, '<span class="text-emerald-500 font-bold">$1</span>');
+      return text;
+    }
+
     function toArabicNumber(num) {
       return String(num).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
     }
@@ -618,142 +537,6 @@
 
     arabicSizeSlider.addEventListener('input', (e) => applyArabicFontRem(safeNumber(e.target.value, 2.2)));
     translationSizeSlider.addEventListener('input', (e) => applyTranslationFontRem(safeNumber(e.target.value, 1.0)));
-
-    /**********************
-     * Tajweed toggle state
-     **********************/
-    function isTajweedEnabled() {
-      const v = localStorage.getItem(STORAGE_KEYS.tajweedEnabled);
-      return v === null ? true : (v === 'true');
-    }
-    function setTajweedEnabled(enabled) {
-      localStorage.setItem(STORAGE_KEYS.tajweedEnabled, String(enabled));
-      document.getElementById('label-tajweed').innerText = `Tajweed: ${enabled ? 'ON' : 'OFF'}`;
-    }
-
-    function stripTajweedMarkup(html) {
-      // Remove <tajweed ...> wrappers but keep inner text
-      return html.replace(/<\/?tajweed\b[^>]*>/gi, '');
-    }
-
-    function sanitizeTajweedHTML(html) {
-      // Very small sanitizer: keep only <tajweed ...> and strip other tags if they ever appear.
-      // quran-tajweed should only contain <tajweed ...> tags.
-      // 1) remove any script/style tags
-      html = html.replace(/<\s*(script|style)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '');
-      // 2) remove all tags except tajweed
-      html = html.replace(/<(?!\/?tajweed\b)[^>]+>/gi, '');
-      return html;
-    }
-
-    toggleTajweedBtn.addEventListener('click', async () => {
-      const next = !isTajweedEnabled();
-      setTajweedEnabled(next);
-      // Re-render current juz without re-fetching if possible; easiest is re-render from cached Juz response
-      await fetchAndRenderJuz(currentActiveJuz, false);
-      closeSidebar();
-    });
-
-    /**********************
-     * Navigation mode + filtering
-     **********************/
-    function getNavMode() {
-      const saved = localStorage.getItem(STORAGE_KEYS.navMode);
-      return (saved === 'type' || saved === 'dropdown') ? saved : 'dropdown';
-    }
-
-    function setNavMode(mode) {
-      localStorage.setItem(STORAGE_KEYS.navMode, mode);
-      const isDropdown = mode === 'dropdown';
-
-      navModeDropdownBtn.classList.toggle('active', isDropdown);
-      navModeTypeBtn.classList.toggle('active', !isDropdown);
-
-      // In type mode we still SHOW dropdowns, but UX says: user can type + press Enter to jump.
-      navTypeHint.classList.toggle('hidden', isDropdown);
-    }
-
-    navModeDropdownBtn.addEventListener('click', () => setNavMode('dropdown'));
-    navModeTypeBtn.addEventListener('click', () => setNavMode('type'));
-
-    function filterDropdown(selectEl, keyword) {
-      const k = keyword.trim().toLowerCase();
-      const opts = Array.from(selectEl.options);
-
-      // Always keep first option visible if it's a placeholder
-      for (let i = 0; i < opts.length; i++) {
-        const opt = opts[i];
-        if (i === 0 && (opt.value === '' || opt.text.includes('--'))) {
-          opt.hidden = false;
-          continue;
-        }
-        if (!k) opt.hidden = false;
-        else opt.hidden = !opt.text.toLowerCase().includes(k);
-      }
-
-      // If current selection becomes hidden, reset to placeholder
-      const selectedOpt = selectEl.options[selectEl.selectedIndex];
-      if (selectedOpt && selectedOpt.hidden) {
-        selectEl.selectedIndex = 0;
-      }
-    }
-
-    function applyNavFilter() {
-      const keyword = navSearch.value || '';
-      filterDropdown(juzSelect, keyword);
-      filterDropdown(surahSelect, keyword);
-      filterDropdown(pageSelect, keyword);
-    }
-
-    navSearch.addEventListener('input', applyNavFilter);
-
-    navSearch.addEventListener('keydown', async (e) => {
-      if (e.key !== 'Enter') return;
-      if (getNavMode() !== 'type') return;
-
-      const q = (navSearch.value || '').trim().toLowerCase();
-      if (!q) return;
-
-      // Type mode: try to interpret simple patterns.
-      // - "juz 2" / "2" => juz 2
-      // - "page 5" / "p 5" => jump page 5
-      // - "baqarah" => jump surah
-      const juzMatch = q.match(/\b(juz)?\s*(\d{1,2})\b/);
-      const pageMatch = q.match(/\b(page|p)\s*(\d{1,3})\b/);
-
-      if (pageMatch) {
-        const pageNum = safeNumber(pageMatch[2], 0);
-        const id = `page-${pageNum}`;
-        if (document.getElementById(id)) {
-          pageSelect.value = id;
-          scrollToTarget(id);
-          closeSidebar();
-          return;
-        }
-      }
-
-      if (juzMatch) {
-        const juzNum = safeNumber(juzMatch[2], 0);
-        if (juzNum >= 1 && juzNum <= 30) {
-          currentActiveJuz = juzNum;
-          await fetchAndRenderJuz(currentActiveJuz, false);
-          closeSidebar();
-          return;
-        }
-      }
-
-      // Try match surah dropdown labels
-      const surahOpts = Array.from(surahSelect.options).slice(1);
-      const found = surahOpts.find(o => o.text.toLowerCase().includes(q));
-      if (found) {
-        surahSelect.value = found.value;
-        scrollToTarget(found.value);
-        closeSidebar();
-        return;
-      }
-
-      showToast('No match found.');
-    });
 
     /**********************
      * IndexedDB cache
@@ -959,7 +742,7 @@
 
     async function fetchJuzFromNetwork(juzNumber, translationEdition) {
       const [resArabic, resTrans] = await Promise.all([
-        fetch(`https://api.alquran.cloud/v1/juz/${juzNumber}/${EDITIONS.ARABIC_TAJWEED}`, { cache: 'no-store' }),
+        fetch(`https://api.alquran.cloud/v1/juz/${juzNumber}/${EDITIONS.ARABIC}`, { cache: 'no-store' }),
         fetch(`https://api.alquran.cloud/v1/juz/${juzNumber}/${translationEdition}`, { cache: 'no-store' }),
       ]);
 
@@ -973,7 +756,7 @@
     }
 
     async function getJuzData(juzNumber, translationEdition) {
-      const cacheKey = `juz-${juzNumber}__arabic-${EDITIONS.ARABIC_TAJWEED}__trans-${translationEdition}`;
+      const cacheKey = `juz-${juzNumber}__trans-${translationEdition}`;
 
       try {
         const cached = await idbGet(cacheKey);
@@ -997,7 +780,6 @@
 
     async function fetchAndRenderJuz(juzNumber, isInitialLoad = false) {
       const translationEdition = getSelectedTranslationEdition();
-      const tajweedEnabled = isTajweedEnabled();
 
       setLoadingState(true, 'Preparing (offline-first)...');
       container.innerHTML = '';
@@ -1066,14 +848,9 @@
             currentSurahNumber = ayah.surah.number;
           }
 
-          let textAr = ayah.text || '';
-          // Tajweed edition uses <tajweed ...> tags; sanitize + optionally strip
-          textAr = sanitizeTajweedHTML(textAr);
-          if (!tajweedEnabled) textAr = stripTajweedMarkup(textAr);
-
+          let textAr = colorizeWaqf(ayah.text);
           const textTr = ayahsTrans[index]?.text ?? '';
 
-          // Handle bismillah duplication (same approach as before)
           if (ayah.numberInSurah === 1 && ayah.surah.number !== 1) {
             textAr = textAr.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ', '');
           }
@@ -1105,9 +882,6 @@
         surahSelect.disabled = false;
         pageSelect.disabled = false;
         juzSelect.value = String(juzNumber);
-
-        // Apply filter after re-populating options (so search keeps working)
-        applyNavFilter();
 
         calculateProgress();
         updateStreakUI();
@@ -1157,7 +931,7 @@
 
       } catch (error) {
         console.error(error);
-        setLoadingState(true, 'Failed to load. Check internet (or cache not available yet for this Juz + translation).');
+        setLoadingState(true, 'Failed to load. Check your internet (or cache is not available yet for this Juz + translation).');
         showToast('Failed to load 😕');
       }
     }
@@ -1182,7 +956,7 @@
 
       try {
         const fresh = await fetchJuzFromNetwork(juzNumber, translationEdition);
-        await idbSet(`juz-${juzNumber}__arabic-${EDITIONS.ARABIC_TAJWEED}__trans-${translationEdition}`, fresh);
+        await idbSet(`juz-${juzNumber}__trans-${translationEdition}`, fresh);
         setOfflineProgress(`Saved Juz ${juzNumber} ✅`, 100);
         showToast(`Offline ready: Juz ${juzNumber}`);
       } catch (e) {
@@ -1206,7 +980,7 @@
 
         try {
           const fresh = await fetchJuzFromNetwork(j, translationEdition);
-          await idbSet(`juz-${j}__arabic-${EDITIONS.ARABIC_TAJWEED}__trans-${translationEdition}`, fresh);
+          await idbSet(`juz-${j}__trans-${translationEdition}`, fresh);
           ok++;
         } catch (e) {
           console.warn(`Failed juz ${j}`, e);
@@ -1295,9 +1069,6 @@
       const darkPref = localStorage.getItem(STORAGE_KEYS.darkPref) === 'true';
       setDarkMode(darkPref);
 
-      // tajweed pref
-      setTajweedEnabled(isTajweedEnabled());
-
       // translation edition
       const savedEdition = (localStorage.getItem(STORAGE_KEYS.translationEdition) || EDITIONS.ID);
       setSelectedTranslationEdition(savedEdition);
@@ -1305,9 +1076,6 @@
       // restore juz
       const savedJuz = safeNumber(localStorage.getItem(STORAGE_KEYS.lastReadJuz), 1);
       currentActiveJuz = (savedJuz >= 1 && savedJuz <= 30) ? savedJuz : 1;
-
-      // nav mode
-      setNavMode(getNavMode());
 
       updateStreakUI();
       maybeShowIOSBanner();
